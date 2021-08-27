@@ -1,0 +1,57 @@
+default_language_version:
+  # default language version for each language
+  python: python3.9
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      # See https://pre-commit.com/hooks.html for more hooks
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: pretty-format-json
+        args: [--autofix]
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: fix-encoding-pragma
+      - id: forbid-new-submodules
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+# Black
+  - repo: https://github.com/psf/black
+    rev: 21.7b0
+    hooks:
+      - id: black
+
+# iSort
+  - repo: https://github.com/asottile/seed-isort-config
+    rev: v2.2.0
+    hooks:
+      - id: seed-isort-config
+  - repo: https://github.com/pycqa/isort
+    rev: 5.9.3
+    hooks:
+      - id: isort
+
+# Flake 8
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        additional_dependencies: [
+            "flake8-bugbear",
+            "flake8-comprehensions",
+            "flake8-mutable",
+            "flake8-print",
+            "flake8-simplify",
+        ]
+# Mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v0.910'
+    hooks:
+      - id: mypy
+        exclude: "[a-zA-Z]*/(migrations)/(.)*"
+        additional_dependencies: ['pydantic', 'sqlalchemy', 'sqlalchemy2-stubs']
