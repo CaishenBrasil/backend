@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr
@@ -14,17 +14,13 @@ class UserBase(BaseModel):
     is_admin: bool
 
 
-class User(UserBase):
-    # id: UUID4
-    id: int
-
-
 class UserCreate(UserBase):
     password: str
 
 
-class UserRead(User):
-    pass
+class UserRead(UserBase):
+    id: int
+    created_at: datetime
 
 
 class UserUpdate(UserBase):
