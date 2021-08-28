@@ -12,6 +12,16 @@ prefix = settings.API_VERSION_STR + "/users"
 router = APIRouter(prefix=prefix, tags=["User"])
 
 
+@router.post(
+    "/init", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED
+)
+def create_first_user(
+    *, session: Session = Depends(get_session), user_in: schemas.UserCreate
+) -> Any:
+    user = crud.user.create(session, obj_in=user_in)
+    return user
+
+
 @router.post("/", response_model=schemas.UserRead)
 def create_user(
     *,
@@ -35,6 +45,7 @@ def create_user(
         #     send_new_account_email(
         #         email_to=user_in.email, username=user_in.email, password=user_in.password
         #     )
+
         return user
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,7 +64,8 @@ def update_user(
     Update user.
     """
     if crud.user.is_admin(current_user):
-        user = crud.user.update(session, db_obj=current_user, obj_in=user_in)
+        db_user = crud.user.get(session, id=user_in.id)
+        user = crud.user.update(session, db_obj=db_user, obj_in=user_in)
         if user:
             return user
         raise HTTPException(
@@ -86,6 +98,12 @@ def update_current_user(
     """
     Update current user.
     """
+    if current_user.is_admin:
+        user = crud.user.update(session, db_obj=current_user, obj_in=user_in)
+        return user
+    user_in = schemas.UserUpdate(
+        **user_in.dict(exclude={"is_admin"}, exclude_unset=True)
+    )
     user = crud.user.update(session, db_obj=current_user, obj_in=user_in)
     return user
 

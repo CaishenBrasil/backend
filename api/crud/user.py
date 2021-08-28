@@ -26,6 +26,7 @@ class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserUpdate]):
             password=get_password_hash(obj_in.password),
             birth_date=obj_in.birth_date,
             email=obj_in.email,
+            is_admin=obj_in.is_admin,
         )
         session.add(db_obj)
         session.commit()
@@ -35,13 +36,10 @@ class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserUpdate]):
     def update(
         self, session: Session, *, db_obj: models.User, obj_in: schemas.UserUpdate
     ) -> models.User:
-        update_data = obj_in.dict(exclude_unset=True)
-        if update_data["password"]:
-            hashed_password = get_password_hash(update_data["password"])
-            update_data["password"] = hashed_password
+        if obj_in.password:
+            obj_in.password = get_password_hash(obj_in.password)
         return super().update(session, db_obj=db_obj, obj_in=obj_in)
 
-    # todo: should this be here, or elsewhere?
     def authenticate(
         self, session: Session, *, email: str, password: str
     ) -> Optional[models.User]:

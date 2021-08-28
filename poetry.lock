@@ -82,20 +82,6 @@ tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)"
 tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins"]
 
 [[package]]
-name = "authlib"
-version = "0.15.4"
-description = "The ultimate Python library in building OAuth and OpenID Connect servers."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-cryptography = "*"
-
-[package.extras]
-client = ["requests"]
-
-[[package]]
 name = "backports.entry-points-selectable"
 version = "1.1.0"
 description = "Compatibility shim providing selectable entry points for older implementations"
@@ -920,6 +906,17 @@ pycrypto = ["pycrypto (>=2.6.0,<2.7.0)", "pyasn1"]
 pycryptodome = ["pycryptodome (>=3.3.1,<4.0.0)", "pyasn1"]
 
 [[package]]
+name = "python-multipart"
+version = "0.0.5"
+description = "A streaming multipart parser for Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = ">=1.4.0"
+
+[[package]]
 name = "pytz"
 version = "2021.1"
 description = "World timezone definitions, modern and historical"
@@ -1148,7 +1145,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "211c83dab4e4342f0a225fdf138a9da7af4d3870ff5af20e89df01c997d3768e"
+content-hash = "7e089caca77b405ae3266d2fad6cfdb9dc6b046c82257d2d1f7bd650f21e5a06"
 
 [metadata.files]
 alembic = [
@@ -1178,10 +1175,6 @@ atomicwrites = [
 attrs = [
     {file = "attrs-21.2.0-py2.py3-none-any.whl", hash = "sha256:149e90d6d8ac20db7a955ad60cf0e6881a3f20d37096140088356da6c716b0b1"},
     {file = "attrs-21.2.0.tar.gz", hash = "sha256:ef6aaac3ca6cd92904cdd0d83f629a15f18053ec84e6432106f7a4d04ae4f5fb"},
-]
-authlib = [
-    {file = "Authlib-0.15.4-py2.py3-none-any.whl", hash = "sha256:d9fe5edb59801b16583faa86f88d798d99d952979b9616d5c735b9170b41ae2c"},
-    {file = "Authlib-0.15.4.tar.gz", hash = "sha256:37df3a2554bc6fe0da3cc6848c44fac2ae40634a7f8fc72543947f4330b26464"},
 ]
 "backports.entry-points-selectable" = [
     {file = "backports.entry_points_selectable-1.1.0-py2.py3-none-any.whl", hash = "sha256:a6d9a871cde5e15b4c4a53e3d43ba890cc6861ec1332c9c2428c92f977192acc"},
@@ -1782,6 +1775,9 @@ python-editor = [
 python-jose = [
     {file = "python-jose-3.3.0.tar.gz", hash = "sha256:55779b5e6ad599c6336191246e95eb2293a9ddebd555f796a65f838f07e5d78a"},
     {file = "python_jose-3.3.0-py2.py3-none-any.whl", hash = "sha256:9b1376b023f8b298536eedd47ae1089bcdb848f1535ab30555cd92002d78923a"},
+]
+python-multipart = [
+    {file = "python-multipart-0.0.5.tar.gz", hash = "sha256:f7bb5f611fc600d15fa47b3974c8aa16e93724513b49b5f95c81e6624c83fa43"},
 ]
 pytz = [
     {file = "pytz-2021.1-py2.py3-none-any.whl", hash = "sha256:eb10ce3e7736052ed3623d49975ce333bcd712c7bb19a58b9e2089d4057d0798"},

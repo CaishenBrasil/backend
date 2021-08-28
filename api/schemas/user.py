@@ -13,6 +13,10 @@ class UserBase(BaseModel):
     email: EmailStr
     is_admin: bool
 
+    class Config:
+        orm_mode = True
+        anystr_strip_whitespace = True
+
 
 class UserCreate(UserBase):
     password: str

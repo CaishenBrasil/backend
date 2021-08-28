@@ -20,6 +20,7 @@ passlib = {extras = ["bcrypt"], version="^1.7.2"}
 python-jose = {extras = ["cryptography"], version="^3.1.0"}
 emails = "^0.6"
 httpx = "^0.19.0"
+python-multipart = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.11.1"
@@ -51,6 +52,7 @@ warn_redundant_casts = true
 strict_optional = false
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 disallow_untyped_defs = true
+follow_imports = "silent"
 
 
 [build-system]
