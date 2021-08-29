@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import secrets
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import BaseSettings, EmailStr, validator
+
+# AnyHttpUrl, HttpUrl, PostgresDsn,
 
 
 class Settings(BaseSettings):
