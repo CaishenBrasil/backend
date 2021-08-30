@@ -20,7 +20,7 @@ passlib = {extras = ["bcrypt"], version="^1.7.2"}
 python-jose = {extras = ["cryptography"], version="^3.1.0"}
 emails = "^0.6"
 httpx = "^0.19.0"
-Authlib = "^0.15.4"
+python-multipart = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.11.1"
@@ -30,10 +30,6 @@ isort = "^5.9.3"
 flake8 = "^3.9.2"
 pytest-cov = "^2.11.1"
 sqlalchemy2-stubs = "^0.0.2-alpha.13"
-
-
-[tool.poetry.scripts]
-dev-server = "uvicorn main.api:app --reload"
 
 [tool.black]
 line-length = 88
@@ -56,6 +52,7 @@ warn_redundant_casts = true
 strict_optional = false
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 disallow_untyped_defs = true
+follow_imports = "silent"
 
 
 [build-system]

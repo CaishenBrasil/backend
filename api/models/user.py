@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Date, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Integer, String
 
 from .base import Base
 
@@ -25,3 +26,4 @@ class User(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, unique=True, nullable=False, index=False)
     is_admin = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.now)
