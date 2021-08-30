@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseSettings, PostgresDsn, validator
+from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
@@ -39,6 +39,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 8
     ALGORITHM: str = "HS256"
+
+    # CORS
+
+    CORS_ORIGINS: List[AnyHttpUrl] = ["http://www.example.com"]  # type: ignore
+    ALLOW_CREDENTIALS: bool = True
+    ALLOW_METHODS: Union[str, List[str]] = "*"
+    ALLOW_HEADERS: Union[str, List[str]] = "*"
 
     class Config:
         case_sensitive = True
