@@ -9,7 +9,7 @@ license = "MIT"
 python = "^3.9"
 fastapi = "^0.68.1"
 uvicorn = "^0.15.0"
-pydantic = "^1.8.2"
+pydantic = {extras = ["dotenv"], version = "^1.8.2"}
 SQLAlchemy = {extras = ["mypy"], version = "^1.4.23"}
 alembic = "^1.6.5"
 celery = "^5.1.2"
@@ -43,7 +43,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 default_section = "THIRDPARTY"
 known_first_party = []
-known_third_party = ["fastapi", "jose", "passlib", "pydantic", "sqlalchemy"]
+known_third_party = ["fastapi", "jose", "passlib", "pydantic", "settings", "sqlalchemy"]
 
 [tool.mypy]
 ignore_missing_imports = true
