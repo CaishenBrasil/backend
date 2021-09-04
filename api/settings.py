@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = None
     POSTGRES_DB: str = None
     SQLALCHEMY_DATABASE_URI: Optional[Union[PostgresDsn, str]] = None
+    SQLALCHEMY_CONNECT_ARGS: Optional[Dict[Any, Any]] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
@@ -32,6 +33,16 @@ class Settings(BaseSettings):
                 path=f"/{values.get('POSTGRES_DB') or ''}",
             )
         return "sqlite:///./sql_app.db"
+
+    @validator("SQLALCHEMY_CONNECT_ARGS", pre=True)
+    def create_connect_args(
+        cls, v: Optional[Dict[Any, Any]], values: Dict[str, Any]
+    ) -> Dict:
+        if isinstance(v, dict):
+            return v
+        if values.get("DATABASE_TYPE") == "postgresql":
+            return {}
+        return {"check_same_thread": False}
 
     # SECURITY
 
