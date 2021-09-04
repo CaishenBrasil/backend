@@ -43,7 +43,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 default_section = "THIRDPARTY"
 known_first_party = []
-known_third_party = ["fastapi", "jose", "passlib", "pydantic", "sqlalchemy"]
+known_third_party = ["fastapi", "jose", "passlib", "pydantic", "settings", "sqlalchemy"]
 
 [tool.mypy]
 ignore_missing_imports = true
