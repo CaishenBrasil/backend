@@ -22,7 +22,7 @@ def create_first_user(
     return user
 
 
-@router.post("/", response_model=schemas.UserRead)
+@router.post("/", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(
     *,
     session: Session = Depends(get_session),
