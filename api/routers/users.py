@@ -18,6 +18,10 @@ router = APIRouter(prefix=prefix, tags=["User"])
 def create_first_user(
     *, session: Session = Depends(get_session), user_in: schemas.UserCreate
 ) -> Any:
+    """
+    This is a workaround solution, ideally we would populate DB with super-user when initiating it.
+    Remember to remove this method before moving away from dev.
+    """
     user = crud.user.create(session, obj_in=user_in)
     return user
 
@@ -36,16 +40,11 @@ def create_user(
         user = crud.user.get_by_email(session, email=user_in.email)
         if user:
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_409_CONFLICT,
                 detail="The user with this email already exists in the system.",
             )
         user = crud.user.create(session, obj_in=user_in)
         # todo: send e-mail
-        # if settings.EMAILS_ENABLED and user_in.email:
-        #     send_new_account_email(
-        #         email_to=user_in.email, username=user_in.email, password=user_in.password
-        #     )
-
         return user
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
