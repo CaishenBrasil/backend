@@ -15,6 +15,7 @@ def get_current_user(
     user = crud.user.get(session, id=token_data.sub)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Could not validate credentials, try to re-login.",
         )
     return user
