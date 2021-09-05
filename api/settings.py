@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     # DATABASE
 
     DATABASE_TYPE: str = "sqlite"
+    DBAPI: Optional[str] = None
     POSTGRES_SERVER: str = None
     POSTGRES_USER: str = None
     POSTGRES_PASSWORD: str = None
@@ -26,13 +27,14 @@ class Settings(BaseSettings):
             return v
         if values.get("DATABASE_TYPE") == "postgresql":
             return PostgresDsn.build(
-                scheme="postgresql",
+                scheme="postgresql+asyncpg",
                 user=values.get("POSTGRES_USER"),
                 password=values.get("POSTGRES_PASSWORD"),
                 host=values.get("POSTGRES_SERVER"),
                 path=f"/{values.get('POSTGRES_DB') or ''}",
             )
-        return "sqlite:///./sql_app.db"
+
+        return "sqlite+aiosqlite:///./sql_app.db"
 
     @validator("SQLALCHEMY_CONNECT_ARGS", pre=True)
     def create_connect_args(

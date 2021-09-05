@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from typing import Optional
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.engine.result import Result
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 import api.models as models
 import api.schemas as schemas
@@ -12,14 +13,17 @@ from .base import CRUDBase
 
 
 class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserUpdate]):
-    def get_by_email(self, session: Session, *, email: str) -> Optional[models.User]:
-        return (
-            session.execute(select(models.User).where(models.User.email == email))
-            .scalars()
-            .first()
+    async def get_by_email(
+        self, session: AsyncSession, *, email: str
+    ) -> Optional[models.User]:
+        result: Result = await session.execute(
+            select(models.User).where(models.User.email == email)
         )
+        return result.scalars().first()
 
-    def create(self, session: Session, *, obj_in: schemas.UserCreate) -> models.User:
+    async def create(
+        self, session: AsyncSession, *, obj_in: schemas.UserCreate
+    ) -> models.User:
 
         db_obj = models.User(
             name=obj_in.name,
@@ -29,21 +33,21 @@ class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserUpdate]):
             is_admin=obj_in.is_admin,
         )
         session.add(db_obj)
-        session.commit()
-        session.refresh(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
         return db_obj
 
-    def update(
-        self, session: Session, *, db_obj: models.User, obj_in: schemas.UserUpdate
+    async def update(
+        self, session: AsyncSession, *, db_obj: models.User, obj_in: schemas.UserUpdate
     ) -> models.User:
         if obj_in.password:
             obj_in.password = get_password_hash(obj_in.password)
-        return super().update(session, db_obj=db_obj, obj_in=obj_in)
+        return await super().update(session, db_obj=db_obj, obj_in=obj_in)
 
-    def authenticate(
-        self, session: Session, *, email: str, password: str
+    async def authenticate(
+        self, session: AsyncSession, *, email: str, password: str
     ) -> Optional[models.User]:
-        user = self.get_by_email(session, email=email)
+        user = await self.get_by_email(session, email=email)
         if not user:
             return None
         if not verify_password(password, user.password):

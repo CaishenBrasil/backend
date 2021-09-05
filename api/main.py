@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 from fastapi import FastAPI
 
-from .models.base import Base
-from .models.user import User  # noqa: F401
+from .models import Base, User  # noqa: F401
 from .routers import login, users
 from .utils.database import engine
-
-Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI(
     title="Caishen User API",
@@ -17,6 +13,12 @@ app = FastAPI(
 
 app.include_router(users.router)
 app.include_router(login.router)
+
+
+@app.on_event("startup")
+async def db_init() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 
 @app.get("/")

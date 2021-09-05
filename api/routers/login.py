@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import crud, schemas
 from api.core import security
@@ -16,14 +16,14 @@ router = APIRouter(prefix=prefix, tags=["Login"])
 
 
 @router.post("/access-token", response_model=schemas.Token)
-def login_access_token(
-    session: Session = Depends(get_session),
+async def login_access_token(
+    session: AsyncSession = Depends(get_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
-    user = crud.user.authenticate(
+    user = await crud.user.authenticate(
         session, email=form_data.username, password=form_data.password
     )
     if not user:
