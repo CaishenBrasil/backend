@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from typing import Generator
+from typing import AsyncGenerator
 
 from api.utils.database import SessionLocal
 
 
-def get_session() -> Generator:
-    with SessionLocal() as session:
+async def get_session() -> AsyncGenerator:
+    async with SessionLocal() as session:
         yield session

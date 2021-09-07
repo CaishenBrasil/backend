@@ -10,7 +10,7 @@ python = "^3.9"
 fastapi = "^0.68.1"
 uvicorn = "^0.15.0"
 pydantic = {extras = ["dotenv"], version = "^1.8.2"}
-SQLAlchemy = {extras = ["mypy"], version = "^1.4.23"}
+SQLAlchemy = {extras = ["asyncio"], version = "^1.4.23"}
 alembic = "^1.6.5"
 celery = "^5.1.2"
 pytest = "^6.2.4"
@@ -21,6 +21,7 @@ python-jose = {extras = ["cryptography"], version="^3.1.0"}
 emails = "^0.6"
 httpx = "^0.19.0"
 python-multipart = "^0.0.5"
+aiosqlite = "^0.17.0"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.11.1"
@@ -43,7 +44,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 default_section = "THIRDPARTY"
 known_first_party = []
-known_third_party = ["fastapi", "jose", "passlib", "pydantic", "settings", "sqlalchemy"]
+known_third_party = ["fastapi", "jose", "passlib", "pydantic", "sqlalchemy"]
 
 [tool.mypy]
 ignore_missing_imports = true

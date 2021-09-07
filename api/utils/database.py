@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
-from settings import settings
-from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine(
+from api.settings import settings
+
+engine = create_async_engine(
     settings.SQLALCHEMY_DATABASE_URI,
-    connect_args={"check_same_thread": False},
+    connect_args=settings.SQLALCHEMY_CONNECT_ARGS,
     echo=True,
 )
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+    expire_on_commit=False,
+    class_=AsyncSession,
+)
