@@ -4,11 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.utils.database import create_super_user
 
-# from .models import Base, User  # noqa: F401
 from .routers import login, users
 from .settings import settings
-
-# from .utils.database import engine
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
