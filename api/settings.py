@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from datetime import date
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
+from pydantic.networks import EmailStr
 
 
 class Settings(BaseSettings):
@@ -59,6 +61,12 @@ class Settings(BaseSettings):
     ALLOW_CREDENTIALS: bool = True
     ALLOW_METHODS: Union[str, List[str]] = "*"
     ALLOW_HEADERS: Union[str, List[str]] = "*"
+
+    # SUPERUSER
+    SUPER_USER_NAME: str = "admin"
+    SUPER_USER_PASSWORD: str = "admin"
+    SUPER_USER_EMAIL: EmailStr = "admin@example.com"  # type: ignore
+    SUPER_USER_BIRTHDATE: date = date(2021, 9, 7)
 
     class Config:
         case_sensitive = True

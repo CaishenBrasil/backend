@@ -12,17 +12,7 @@ prefix = settings.API_VERSION_STR + "/users"
 router = APIRouter(prefix=prefix, tags=["User"])
 
 
-@router.post(
-    "/init", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED
-)
-async def create_first_user(
-    *, session: AsyncSession = Depends(get_session), user_in: schemas.UserCreate
-) -> Any:
-    user = await crud.user.create(session, obj_in=user_in)
-    return user
-
-
-@router.post("/", response_model=schemas.UserRead)
+@router.post("/", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED)
 async def create_user(
     *,
     session: AsyncSession = Depends(get_session),

@@ -53,7 +53,7 @@ repos:
     rev: 'v0.910'
     hooks:
       - id: mypy
-        exclude: "[a-zA-Z]*/(migrations)/(.)*"
+        exclude: "[a-zA-Z]*/(alembic)/(.)*"
         additional_dependencies: ['pydantic', 'sqlalchemy', 'sqlalchemy2-stubs']
 
 ci:
