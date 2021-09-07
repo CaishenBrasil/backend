@@ -9,7 +9,7 @@ from api.settings import settings
 engine = create_async_engine(
     settings.SQLALCHEMY_DATABASE_URI,
     connect_args=settings.SQLALCHEMY_CONNECT_ARGS,
-    echo=True,
+    echo=settings.DEV,
 )
 SessionLocal = sessionmaker(
     autocommit=False,

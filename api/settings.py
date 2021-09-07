@@ -6,11 +6,20 @@ from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 from pydantic.networks import EmailStr
 
 
+class ModifiedPostgresDsn(PostgresDsn):
+    """Hack to allow "postgresql+asyncpg" as a scheme to PostgresDsn until this is allowed on pydantic.
+    Pydantic PR https://github.com/samuelcolvin/pydantic/pull/2567/ already solves it but its not released yet
+    """
+
+    allowed_schemes = {"postgres", "postgresql", "postgresql+asyncpg"}
+
+
 class Settings(BaseSettings):
     # General Parameters
 
     API_VERSION_STR: str = "/api/v1"
     PROJECT_NAME: str = "Caishen App Development Server"
+    DEV: bool = True
 
     # DATABASE
 
@@ -20,7 +29,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = None
     POSTGRES_PASSWORD: str = None
     POSTGRES_DB: str = None
-    SQLALCHEMY_DATABASE_URI: Optional[Union[PostgresDsn, str]] = None
+    SQLALCHEMY_DATABASE_URI: Optional[Union[ModifiedPostgresDsn, str]] = None
     SQLALCHEMY_CONNECT_ARGS: Optional[Dict[Any, Any]] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
@@ -28,12 +37,12 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return v
         if values.get("DATABASE_TYPE") == "postgresql":
-            return PostgresDsn.build(
+            return ModifiedPostgresDsn.build(
                 scheme="postgresql+asyncpg",
                 user=values.get("POSTGRES_USER"),
                 password=values.get("POSTGRES_PASSWORD"),
                 host=values.get("POSTGRES_SERVER"),
-                path=f"/{values.get('POSTGRES_DB') or ''}",
+                path=f"/{values.get('POSTGRES_DB', '')}",
             )
 
         return "sqlite+aiosqlite:///./sql_app.db"
