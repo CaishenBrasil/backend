@@ -16,7 +16,7 @@ router = APIRouter(prefix=prefix, tags=["User"])
 async def create_user(
     *,
     session: AsyncSession = Depends(get_session),
-    user_in: schemas.UserCreate,
+    user_in: schemas.UserLocalCreate,
     current_user: models.User = Depends(get_current_user),
 ) -> Any:
     """
@@ -29,7 +29,7 @@ async def create_user(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="The user with this email already exists in the system.",
             )
-        user = await crud.user.create(session, obj_in=user_in)
+        user = await crud.user.create_local(session, obj_in=user_in)
         # todo: send e-mail
         return user
     raise HTTPException(

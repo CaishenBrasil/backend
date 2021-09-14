@@ -1,4 +1,19 @@
 [[package]]
+name = "aioredis"
+version = "2.0.0"
+description = "asyncio (PEP 3156) Redis support"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+async-timeout = "*"
+typing-extensions = "*"
+
+[package.extras]
+hiredis = ["hiredis (>=1.0)"]
+
+[[package]]
 name = "aiosqlite"
 version = "0.17.0"
 description = "asyncio bridge to the standard sqlite3 module"
@@ -62,6 +77,27 @@ python-versions = ">=3.6"
 
 [package.extras]
 tests = ["pytest", "pytest-asyncio", "mypy (>=0.800)"]
+
+[[package]]
+name = "async-timeout"
+version = "3.0.1"
+description = "Timeout context manager for asyncio programs"
+category = "main"
+optional = false
+python-versions = ">=3.5.3"
+
+[[package]]
+name = "asyncpg"
+version = "0.24.0"
+description = "An asyncio PostgreSQL driver"
+category = "main"
+optional = false
+python-versions = ">=3.6.0"
+
+[package.extras]
+dev = ["Cython (>=0.29.24,<0.30.0)", "pytest (>=6.0)", "Sphinx (>=4.1.2,<4.2.0)", "sphinxcontrib-asyncio (>=0.3.0,<0.4.0)", "sphinx-rtd-theme (>=0.5.2,<0.6.0)", "pycodestyle (>=2.7.0,<2.8.0)", "flake8 (>=3.9.2,<3.10.0)", "uvloop (>=0.15.3)"]
+docs = ["Sphinx (>=4.1.2,<4.2.0)", "sphinxcontrib-asyncio (>=0.3.0,<0.4.0)", "sphinx-rtd-theme (>=0.5.2,<0.6.0)"]
+test = ["pycodestyle (>=2.7.0,<2.8.0)", "flake8 (>=3.9.2,<3.10.0)", "uvloop (>=0.15.3)"]
 
 [[package]]
 name = "atomicwrites"
@@ -664,6 +700,19 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "oauthlib"
+version = "3.1.1"
+description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.extras]
+rsa = ["cryptography (>=3.0.0,<4)"]
+signals = ["blinker (>=1.4.0)"]
+signedtoken = ["cryptography (>=3.0.0,<4)", "pyjwt (>=2.0.0,<3)"]
+
+[[package]]
 name = "packaging"
 version = "21.0"
 description = "Core utilities for Python packages"
@@ -1157,9 +1206,13 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "ffd8f227ece39bd65c54c5550c14f5b642d93904e2115f773f3f9da01ca35857"
+content-hash = "5b9ff4235b6d649bc2de286be2b3f199e431e4f36dc5cd4aefe5880099d620d4"
 
 [metadata.files]
+aioredis = [
+    {file = "aioredis-2.0.0-py3-none-any.whl", hash = "sha256:9921d68a3df5c5cdb0d5b49ad4fc88a4cfdd60c108325df4f0066e8410c55ffb"},
+    {file = "aioredis-2.0.0.tar.gz", hash = "sha256:3a2de4b614e6a5f8e104238924294dc4e811aefbe17ddf52c04a93cbf06e67db"},
+]
 aiosqlite = [
     {file = "aiosqlite-0.17.0-py3-none-any.whl", hash = "sha256:6c49dc6d3405929b1d08eeccc72306d3677503cc5e5e43771efc1e00232e8231"},
     {file = "aiosqlite-0.17.0.tar.gz", hash = "sha256:f0e6acc24bc4864149267ac82fb46dfb3be4455f99fe21df82609cc6e6baee51"},
@@ -1179,6 +1232,25 @@ anyio = [
 asgiref = [
     {file = "asgiref-3.4.1-py3-none-any.whl", hash = "sha256:ffc141aa908e6f175673e7b1b3b7af4fdb0ecb738fc5c8b88f69f055c2415214"},
     {file = "asgiref-3.4.1.tar.gz", hash = "sha256:4ef1ab46b484e3c706329cedeff284a5d40824200638503f5768edb6de7d58e9"},
+]
+async-timeout = [
+    {file = "async-timeout-3.0.1.tar.gz", hash = "sha256:0c3c816a028d47f659d6ff5c745cb2acf1f966da1fe5c19c77a70282b25f4c5f"},
+    {file = "async_timeout-3.0.1-py3-none-any.whl", hash = "sha256:4291ca197d287d274d0b6cb5d6f8f8f82d434ed288f962539ff18cc9012f9ea3"},
+]
+asyncpg = [
+    {file = "asyncpg-0.24.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:c4fc0205fe4ddd5aeb3dfdc0f7bafd43411181e1f5650189608e5971cceacff1"},
+    {file = "asyncpg-0.24.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:a7095890c96ba36f9f668eb552bb020dddb44f8e73e932f8573efc613ee83843"},
+    {file = "asyncpg-0.24.0-cp310-cp310-win_amd64.whl", hash = "sha256:8ff5073d4b654e34bd5eaadc01dc4d68b8a9609084d835acd364cd934190a08d"},
+    {file = "asyncpg-0.24.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:e36c6806883786b19551bb70a4882561f31135dc8105a59662e0376cf5b2cbc5"},
+    {file = "asyncpg-0.24.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:ddffcb85227bf39cd1bedd4603e0082b243cf3b14ced64dce506a15b05232b83"},
+    {file = "asyncpg-0.24.0-cp37-cp37m-win_amd64.whl", hash = "sha256:41704c561d354bef01353835a7846e5606faabbeb846214dfcf666cf53319f18"},
+    {file = "asyncpg-0.24.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:29ef6ae0a617fc13cc2ac5dc8e9b367bb83cba220614b437af9b67766f4b6b20"},
+    {file = "asyncpg-0.24.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:eed43abc6ccf1dc02e0d0efc06ce46a411362f3358847c6b0ec9a43426f91ece"},
+    {file = "asyncpg-0.24.0-cp38-cp38-win_amd64.whl", hash = "sha256:129d501f3d30616afd51eb8d3142ef51ba05374256bd5834cec3ef4956a9b317"},
+    {file = "asyncpg-0.24.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:a458fc69051fbb67d995fdda46d75a012b5d6200f91e17d23d4751482640ed4c"},
+    {file = "asyncpg-0.24.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:556b0e92e2b75dc028b3c4bc9bd5162ddf0053b856437cf1f04c97f9c6837d03"},
+    {file = "asyncpg-0.24.0-cp39-cp39-win_amd64.whl", hash = "sha256:a738f4807c853623d3f93f0fea11f61be6b0e5ca16ea8aeb42c2c7ee742aa853"},
+    {file = "asyncpg-0.24.0.tar.gz", hash = "sha256:dd2fa063c3344823487d9ddccb40802f02622ddf8bf8a6cc53885ee7a2c1c0c6"},
 ]
 atomicwrites = [
     {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},
@@ -1642,6 +1714,10 @@ mypy-extensions = [
 nodeenv = [
     {file = "nodeenv-1.6.0-py2.py3-none-any.whl", hash = "sha256:621e6b7076565ddcacd2db0294c0381e01fd28945ab36bcf00f41c5daf63bef7"},
     {file = "nodeenv-1.6.0.tar.gz", hash = "sha256:3ef13ff90291ba2a4a7a4ff9a979b63ffdd00a464dbe04acf0ea6471517a4c2b"},
+]
+oauthlib = [
+    {file = "oauthlib-3.1.1-py2.py3-none-any.whl", hash = "sha256:42bf6354c2ed8c6acb54d971fce6f88193d97297e18602a3a886603f9d7730cc"},
+    {file = "oauthlib-3.1.1.tar.gz", hash = "sha256:8f0215fcc533dd8dd1bee6f4c412d4f0cd7297307d43ac61666389e3bc3198a3"},
 ]
 packaging = [
     {file = "packaging-21.0-py3-none-any.whl", hash = "sha256:c86254f9220d55e31cc94d69bade760f0847da8000def4dfe1c6b872fd14ff14"},

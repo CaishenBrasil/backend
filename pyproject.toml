@@ -22,6 +22,9 @@ emails = "^0.6"
 httpx = "^0.19.0"
 python-multipart = "^0.0.5"
 aiosqlite = "^0.17.0"
+oauthlib = "^3.1.1"
+aioredis = "^2.0.0"
+asyncpg = "^0.24.0"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.11.1"
@@ -44,7 +47,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 default_section = "THIRDPARTY"
 known_first_party = []
-known_third_party = ["alembic", "fastapi", "jose", "passlib", "pydantic", "sqlalchemy"]
+known_third_party = ["aioredis", "alembic", "fastapi", "httpx", "jose", "oauthlib", "passlib", "pydantic", "sqlalchemy"]
 
 [tool.mypy]
 ignore_missing_imports = true

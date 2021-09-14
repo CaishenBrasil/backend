@@ -12,7 +12,13 @@ from api.core.security import get_password_hash, verify_password
 from .base import CRUDBase
 
 
-class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserUpdate]):
+class CRUDUser(
+    CRUDBase[
+        models.User,
+        schemas.UserCreate,
+        schemas.UserUpdate,
+    ]
+):
     async def get_by_email(
         self, session: AsyncSession, *, email: str
     ) -> Optional[models.User]:
@@ -27,7 +33,24 @@ class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserUpdate]):
 
         db_obj = models.User(
             name=obj_in.name,
+            auth_provider=obj_in.auth_provider,
+            birth_date=obj_in.birth_date,
+            email=obj_in.email,
+            is_admin=obj_in.is_admin,
+        )
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    async def create_local(
+        self, session: AsyncSession, *, obj_in: schemas.UserLocalCreate
+    ) -> models.User:
+
+        db_obj = models.User(
+            name=obj_in.name,
             password=get_password_hash(obj_in.password),
+            auth_provider=obj_in.auth_provider,
             birth_date=obj_in.birth_date,
             email=obj_in.email,
             is_admin=obj_in.is_admin,
