@@ -3,13 +3,17 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 :warning: Added ModifiedPostgreSqlDsn on `settings.py` as a hack until pydantic gets updated because drivers are not yet permitted on PostgresDsn schemes. Example: `postgresql+asyncpg`
+
 :warning: Make sure to setup the `.env` file because this will be necessary to start the application using docker
+
 :warning: I highly suggest you use linux to deploy this app, if you are on windows make sure you are developing under [WSL2](https://docs.microsoft.com/pt-br/windows/wsl/install-win10)
 
 ## .env CONFIG
 
 Before running the app, make sure to create a `.env` file on project root. All environment variables available are declared on on `settings.py`.
+
 As this project uses pydantic BaseSettings, the `.env` file will populate the `Settings` class accordingly.
+
 Below is a sample of how your `.env` file shall look.
 
 ```sh
@@ -58,4 +62,4 @@ This will start the following services:
 - [Postgres](https://www.postgresql.org/) to serve as a database for our application
 - This very api will also be started by docker under the service name of `web`
 
-Hopefully :pray: , if everything worked as expected, you will be able to access the application on http://localhost:8000
+Hopefully :pray: , if everything worked as expected, you will be able to access the application on [Caishen User API][http://localhost:8000]

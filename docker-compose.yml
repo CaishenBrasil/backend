@@ -39,8 +39,6 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        expose:
-            - 8000
         environment:
             APP_MODULE: api.main:app
             PRE_START_PATH: scripts/prestart.sh
