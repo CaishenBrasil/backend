@@ -62,4 +62,4 @@ This will start the following services:
 - [Postgres](https://www.postgresql.org/) to serve as a database for our application
 - This very api will also be started by docker under the service name of `web`
 
-Hopefully :pray: , if everything worked as expected, you will be able to access the application on [Caishen User API][http://localhost:8000]
+Hopefully :pray: , if everything worked as expected, you will be able to access the application on [Caishen User API](http://localhost:8000)
