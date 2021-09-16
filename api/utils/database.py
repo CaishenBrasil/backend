@@ -37,7 +37,7 @@ async def create_super_user() -> None:
 
     async with SessionLocal() as session:
         db_super_user = await user.get_by_email(session=session, email=email)
-        if not db_super_user:
+        if db_super_user is None:
             _ = await user.create_local(session=session, obj_in=super_user_in)
 
     return
