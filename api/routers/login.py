@@ -3,16 +3,16 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional
 
 from aioredis.client import Redis
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import crud, schemas
 from api.core.exceptions import (
-    AuthenticationProviderMismatch,
+    AuthenticationProviderMissmatch,
     AuthorizationException,
-    UnauthorizedUser,
+    UnAuthorizedUser,
     exception_handling,
 )
 from api.dependencies import get_session
@@ -35,6 +35,7 @@ auth_cookie_token_data = AuthTokenCookieBearer()
 
 @router.get("/")
 async def exchange_auth_token_for_access_cookie_token(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     token_data: schemas.TokenPayload = Depends(auth_cookie_token_data),
 ) -> Optional[schemas.AccessToken]:
@@ -46,7 +47,16 @@ async def exchange_auth_token_for_access_cookie_token(
 
         user = await crud.user.get(session, id=token_data.sub)
         if user is None:
-            raise UnauthorizedUser("User is not authorized")
+            raise UnAuthorizedUser(
+                log=schemas.UnAuthorizedUserLog(
+                    file_name=__name__,
+                    function_name="exchange_auth_token_for_access_cookie_token",
+                    detail=f"Could not fetch user id {token_data.sub} from database",
+                    request=request,
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    msg="User is not authorized",
+                )
+            )
 
         # Exchange AuthCookieToken by AccessCookieToken
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -71,6 +81,7 @@ async def exchange_auth_token_for_access_cookie_token(
 
 @router.post("/access-token", response_model=schemas.AccessToken)
 async def login_access_token(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Optional[schemas.AccessToken]:
@@ -82,10 +93,17 @@ async def login_access_token(
         session, email=form_data.username, password=form_data.password
     )
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email or password",
+        raise UnAuthorizedUser(
+            log=schemas.UnAuthorizedUserLog(
+                file_name=__name__,
+                function_name="exchange_auth_token_for_access_cookie_token",
+                detail="User provided incorrect email or password",
+                request=request,
+                status_code=status.HTTP_400_BAD_REQUEST,
+                msg="Incorrect email or password",
+            )
         )
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     token = await create_access_token(user.id, expires_delta=access_token_expires)
 
@@ -152,9 +170,18 @@ async def google_login_callback(
                 ),
             )
         elif db_user.auth_provider != "GOOGLE":
-            raise AuthenticationProviderMismatch(
-                current_provider=db_user.auth_provider,
-                msg="User is already registered with another provider.",
+            raise AuthenticationProviderMissmatch(
+                log=schemas.AuthenticationProviderLog(
+                    file_name=__name__,
+                    function_name="google_login_callback",
+                    detail=f"User is already registered with {db_user.auth_provider} provider",
+                    request=request,
+                    status_code=status.HTTP_409_CONFLICT,
+                    msg=f"User is already registered with another provider, \
+                    please use {db_user.auth_provider} provider to log-in",
+                    current_provider=db_user.auth_provider,
+                    failed_provider="GOOGLE",
+                )
             )
 
         auth_token = await create_auth_token(db_user.id, cache)

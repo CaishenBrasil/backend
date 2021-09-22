@@ -25,6 +25,7 @@ aiosqlite = "^0.17.0"
 oauthlib = "^3.1.1"
 aioredis = "^2.0.0"
 asyncpg = "^0.24.0"
+structlog = "^21.1.0"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.11.1"
@@ -47,7 +48,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 default_section = "THIRDPARTY"
 known_first_party = []
-known_third_party = ["aioredis", "alembic", "fastapi", "httpx", "jose", "oauthlib", "passlib", "pydantic", "sqlalchemy"]
+known_third_party = ["aioredis", "alembic", "fastapi", "httpx", "jose", "oauthlib", "passlib", "pydantic", "sqlalchemy", "structlog"]
 
 [tool.mypy]
 ignore_missing_imports = true

@@ -4,12 +4,13 @@ from datetime import datetime, timedelta
 from typing import Any, Optional, Union
 
 from aioredis.client import Redis
-from jose import JWTError, jwt
+from fastapi import status
+from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.pwd import genword
 from pydantic.types import UUID4
 
 from api import schemas
-from api.core.exceptions import UnauthorizedUser
+from api.core.exceptions import UnAuthorizedUser
 from api.core.security import security_context
 from api.settings import settings
 
@@ -55,8 +56,15 @@ async def validate_state_csrf_token(
     # Also, check that we 100% cached that token in the past
     cached_token_code = await cache.get(state_csrf_token_code)
 
-    if not cached_token_code:
-        raise UnauthorizedUser("Failed to validate against cached state token")
+    if cached_token_code is None:
+        log = schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="validate_state_csrf_token",
+            detail="Failed to validate against cached state token",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            msg="Failed to validate state token",
+        )
+        raise UnAuthorizedUser(log=log)
 
     await cache.delete(state_csrf_token_code)
 
@@ -113,12 +121,36 @@ async def get_auth_token_data(
             algorithms=[settings.ALGORITHM],
         )
     except JWTError as exc:
-        raise UnauthorizedUser(f"Failed to validate auth token: {exc}")
+        log = schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="get_auth_token_data",
+            detail=f"Failed to validate auth token: {exc}",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            msg="Failed to validate auth token",
+        )
+        raise UnAuthorizedUser(log=log)
+
+    except ExpiredSignatureError as exc:
+        log = schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="get_auth_token_data",
+            detail=f"JWT Token is expired: {repr(exc)}",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            msg="Authentication Token is expired, please re-login.",
+        )
+        raise UnAuthorizedUser(log=log)
 
     user_id = await cache.get(auth_token.code)
 
-    if not user_id:
-        raise UnauthorizedUser(f"User {user_id} not cached")
+    if user_id is None:
+        log = schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="get_auth_token_data",
+            detail=f"User {user_id} not cached",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            msg="User is not authorized",
+        )
+        raise UnAuthorizedUser(log=log)
 
     # Invalidate cache. Authentication token can only be used once
     await cache.delete(auth_token.code)
@@ -170,10 +202,34 @@ async def get_access_token_data(
 
         user_id: str = payload.get("sub")
         if user_id is None:
-            raise UnauthorizedUser("Missing 'sub' id from access token")
+            log = schemas.UnAuthorizedUserLog(
+                file_name=__name__,
+                function_name="get_access_token_data",
+                detail="Missing 'sub' id from access token",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                msg="User is not authorized. Invalid Access Token",
+            )
+            raise UnAuthorizedUser(log=log)
 
     except JWTError as exc:
-        raise UnauthorizedUser(f"Failed to validate access token: {exc}")
+        log = schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="get_access_token_data",
+            detail=f"Failed to validate access token: {exc}",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            msg="User is not authorized",
+        )
+        raise UnAuthorizedUser(log=log)
+
+    except ExpiredSignatureError as exc:
+        log = schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="get_access_token_data",
+            detail=f"JWT Access Token is expired: {repr(exc)}",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            msg="Access Token is expired, please re-login.",
+        )
+        raise UnAuthorizedUser(log=log)
 
     token_data = schemas.TokenPayload(sub=user_id)
     return token_data
