@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from .base import BaseModel
 
 
 class BaseLog(BaseModel):

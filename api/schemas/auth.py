@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from pydantic import BaseModel
 from pydantic.networks import AnyHttpUrl
 
+from .base import BaseModel
 from .token import CSRFToken
 
 
