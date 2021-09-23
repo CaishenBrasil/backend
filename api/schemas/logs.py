@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Dict, Optional
 
+from fastapi import status
+
 from .base import BaseModel
 
 
@@ -28,3 +30,4 @@ class AuthenticationProviderLog(BaseHTTPResponseLog):
 
 class UnAuthorizedUserLog(BaseHTTPResponseLog):
     event: Optional[str] = "Failed to authorize user"
+    status_code: Optional[int] = status.HTTP_401_UNAUTHORIZED

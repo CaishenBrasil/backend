@@ -40,7 +40,6 @@ async def create_user(
             function_name="create_user",
             detail=f"User {current_user.id} is not admin and cannot create other users",
             request=request,
-            status_code=status.HTTP_401_UNAUTHORIZED,
             msg="You are not authorized to create users",
         )
     )
@@ -71,7 +70,6 @@ async def update_user(
             function_name="update_user",
             detail=f"User {current_user.id} is not admin and cannot update other users",
             request=request,
-            status_code=status.HTTP_401_UNAUTHORIZED,
             msg="You don't have permission to update users",
         )
     )
@@ -129,7 +127,6 @@ async def delete_user(
             function_name="delete_user",
             detail=f"User {current_user.id} is not admin and cannot delete other users",
             request=request,
-            status_code=status.HTTP_401_UNAUTHORIZED,
             msg="You don't have permission to delete users",
         )
     )
@@ -153,7 +150,6 @@ async def get_multi_users(
             function_name="get_multi_users",
             detail=f"User {current_user.id} is not admin and cannot fetch other users info",
             request=request,
-            status_code=status.HTTP_401_UNAUTHORIZED,
             msg="You don't have permission to retrieve users",
         )
     )

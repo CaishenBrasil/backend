@@ -50,7 +50,6 @@ async def exchange_auth_token_for_access_cookie_token(
                 function_name="exchange_auth_token_for_access_cookie_token",
                 detail=f"Could not fetch user id {token_data.sub} from database",
                 request=request,
-                status_code=status.HTTP_401_UNAUTHORIZED,
                 msg="User is not authorized",
             )
         )

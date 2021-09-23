@@ -12,7 +12,7 @@ def orjson_dumps(v: Any, *, default: Any) -> str:
 
 class BaseModel(PydanticBaseModel):
     """
-    BaseModel with model Config already initialized with all global parameters define
+    BaseModel with model Config already initialized with all global parameters defined
     This shall be used when the Schema is not a database model
     """
 
@@ -26,7 +26,7 @@ class BaseModel(PydanticBaseModel):
 
 class BaseModelORM(PydanticBaseModel):
     """
-    BaseModel with model Config already initialized with all global parameters define
+    BaseModel with model Config already initialized with all global parameters defined
     This shall be used when the Schema is a database model
     """
 
