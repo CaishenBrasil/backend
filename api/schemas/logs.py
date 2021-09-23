@@ -8,6 +8,7 @@ class BaseLog(BaseModel):
     file_name: str
     class_name: Optional[str]
     function_name: Optional[str]
+    event: str
     detail: str
 
 
@@ -26,4 +27,4 @@ class AuthenticationProviderLog(BaseHTTPResponseLog):
 
 
 class UnAuthorizedUserLog(BaseHTTPResponseLog):
-    pass
+    event: Optional[str] = "Failed to authorize user"

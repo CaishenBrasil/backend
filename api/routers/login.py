@@ -13,7 +13,6 @@ from api.core.exceptions import (
     AuthenticationProviderMissmatch,
     AuthorizationException,
     UnAuthorizedUser,
-    exception_handling,
 )
 from api.dependencies import get_session
 from api.dependencies.auth.providers import GoogleAuthProvider
@@ -43,40 +42,38 @@ async def exchange_auth_token_for_access_cookie_token(
     OAuth2 compatible token login, get an access token for future requests
     """
 
-    async with exception_handling():
-
-        user = await crud.user.get(session, id=token_data.sub)
-        if user is None:
-            raise UnAuthorizedUser(
-                log=schemas.UnAuthorizedUserLog(
-                    file_name=__name__,
-                    function_name="exchange_auth_token_for_access_cookie_token",
-                    detail=f"Could not fetch user id {token_data.sub} from database",
-                    request=request,
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    msg="User is not authorized",
-                )
+    user = await crud.user.get(session, id=token_data.sub)
+    if user is None:
+        raise UnAuthorizedUser(
+            log=schemas.UnAuthorizedUserLog(
+                file_name=__name__,
+                function_name="exchange_auth_token_for_access_cookie_token",
+                detail=f"Could not fetch user id {token_data.sub} from database",
+                request=request,
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                msg="User is not authorized",
             )
-
-        # Exchange AuthCookieToken by AccessCookieToken
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = await create_access_token(
-            user.id, expires_delta=access_token_expires
         )
 
-        # Redirect the user to the home page
-        redirect_url = settings.API_VERSION_STR + "/users/me"
-        response = RedirectResponse(url=redirect_url)
+    # Exchange AuthCookieToken by AccessCookieToken
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = await create_access_token(
+        user.id, expires_delta=access_token_expires
+    )
 
-        # Set state cookie
-        response.set_cookie(
-            key="access_token", value=f"Bearer {access_token.code}", httponly=True
-        )
+    # Redirect the user to the home page
+    redirect_url = settings.API_VERSION_STR + "/users/me"
+    response = RedirectResponse(url=redirect_url)
 
-        response.delete_cookie(key="state")
-        response.delete_cookie(key="auth_token")
+    # Set state cookie
+    response.set_cookie(
+        key="access_token", value=f"Bearer {access_token.code}", httponly=True
+    )
 
-        return response
+    response.delete_cookie(key="state")
+    response.delete_cookie(key="auth_token")
+
+    return response
 
 
 @router.post("/access-token", response_model=schemas.AccessToken)
@@ -118,14 +115,13 @@ async def google_login(cache: Redis = Depends(get_cache)) -> Optional[RedirectRe
     Returns:
             Redirect response to the external provider's auth endpoint
     """
-    async with exception_handling():
-        provider = GoogleAuthProvider(client_id=settings.GOOGLE_CLIENT_ID, cache=cache)
+    provider = GoogleAuthProvider(client_id=settings.GOOGLE_CLIENT_ID, cache=cache)
 
-        params = await provider.get_request_uri()
-        request_uri = params.uri
-        response = RedirectResponse(url=request_uri)
+    params = await provider.get_request_uri()
+    request_uri = params.uri
+    response = RedirectResponse(url=request_uri)
 
-        return response
+    return response
 
 
 @router.get("/google-login-callback")
@@ -142,60 +138,60 @@ async def google_login_callback(
     Args:
             request: The incoming request as redirected by Google
     """
-    async with exception_handling():
-        code = request.query_params.get("code")
+    code = request.query_params.get("code")
 
-        if not code:
-            raise AuthorizationException("Missing external authentication token")
+    if not code:
+        raise AuthorizationException("Missing external authentication token")
 
-        provider = GoogleAuthProvider(client_id=settings.GOOGLE_CLIENT_ID, cache=cache)
+    provider = GoogleAuthProvider(client_id=settings.GOOGLE_CLIENT_ID, cache=cache)
 
-        # Authenticate token and get user's info from external provider
-        external_user = await provider.get_user(
-            auth_token=schemas.ExternalAuthToken(code=code)
+    # Authenticate token and get user's info from external provider
+    external_user = await provider.get_user(
+        auth_token=schemas.ExternalAuthToken(code=code)
+    )
+
+    # Get or create the internal user
+    db_user = await crud.user.get_by_email(session, email=external_user.email)
+
+    if db_user is None:
+        db_user = await crud.user.create(
+            session,
+            obj_in=UserCreate(
+                name=external_user.name,
+                birth_date=datetime.now().date(),
+                email=external_user.email,
+                is_admin=False,
+                auth_provider="GOOGLE",
+            ),
+        )
+    elif db_user.auth_provider != "GOOGLE":
+        raise AuthenticationProviderMissmatch(
+            log=schemas.AuthenticationProviderLog(
+                file_name=__name__,
+                function_name="google_login_callback",
+                event="Authentication Provider Missmatch",
+                detail=f"User is already registered with {db_user.auth_provider} provider",
+                request=request,
+                status_code=status.HTTP_409_CONFLICT,
+                msg=f"User is already registered with another provider, \
+                please use {db_user.auth_provider} provider to log-in",
+                current_provider=db_user.auth_provider,
+                failed_provider="GOOGLE",
+            )
         )
 
-        # Get or create the internal user
-        db_user = await crud.user.get_by_email(session, email=external_user.email)
+    auth_token = await create_auth_token(db_user.id, cache)
 
-        if db_user is None:
-            db_user = await crud.user.create(
-                session,
-                obj_in=UserCreate(
-                    name=external_user.name,
-                    birth_date=datetime.now().date(),
-                    email=external_user.email,
-                    is_admin=False,
-                    auth_provider="GOOGLE",
-                ),
-            )
-        elif db_user.auth_provider != "GOOGLE":
-            raise AuthenticationProviderMissmatch(
-                log=schemas.AuthenticationProviderLog(
-                    file_name=__name__,
-                    function_name="google_login_callback",
-                    detail=f"User is already registered with {db_user.auth_provider} provider",
-                    request=request,
-                    status_code=status.HTTP_409_CONFLICT,
-                    msg=f"User is already registered with another provider, \
-                    please use {db_user.auth_provider} provider to log-in",
-                    current_provider=db_user.auth_provider,
-                    failed_provider="GOOGLE",
-                )
-            )
+    # Redirect the user to the home page
+    redirect_url = settings.API_VERSION_STR + "/login"
+    response = RedirectResponse(url=redirect_url)
 
-        auth_token = await create_auth_token(db_user.id, cache)
+    # Set state cookie
+    response.set_cookie(
+        key="auth_token", value=f"Bearer {auth_token.code}", httponly=True
+    )
 
-        # Redirect the user to the home page
-        redirect_url = settings.API_VERSION_STR + "/login"
-        response = RedirectResponse(url=redirect_url)
-
-        # Set state cookie
-        response.set_cookie(
-            key="auth_token", value=f"Bearer {auth_token.code}", httponly=True
-        )
-
-        return response
+    return response
 
 
 @router.get(

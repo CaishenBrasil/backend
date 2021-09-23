@@ -26,6 +26,7 @@ oauthlib = "^3.1.1"
 aioredis = "^2.0.0"
 asyncpg = "^0.24.0"
 structlog = "^21.1.0"
+orjson = "^3.6.3"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.11.1"
@@ -35,6 +36,7 @@ isort = "^5.9.3"
 flake8 = "^3.9.2"
 pytest-cov = "^2.11.1"
 sqlalchemy2-stubs = "^0.0.2-alpha.13"
+types-orjson = "^3.6.0"
 
 [tool.black]
 line-length = 88
@@ -48,7 +50,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 default_section = "THIRDPARTY"
 known_first_party = []
-known_third_party = ["aioredis", "alembic", "fastapi", "httpx", "jose", "oauthlib", "passlib", "pydantic", "sqlalchemy", "structlog"]
+known_third_party = ["aioredis", "alembic", "fastapi", "httpx", "jose", "oauthlib", "orjson", "passlib", "pydantic", "sqlalchemy", "structlog"]
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -59,6 +61,9 @@ plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 disallow_untyped_defs = true
 follow_imports = "silent"
 
+[[tool.mypy.overrides]]
+module = "orjson"
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

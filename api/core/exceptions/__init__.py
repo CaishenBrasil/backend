@@ -6,4 +6,3 @@ from .authentication import (
     UnknownAuthenticationProvider,
 )
 from .authorization import AuthorizationException, UnAuthorizedUser
-from .handler import exception_handling
