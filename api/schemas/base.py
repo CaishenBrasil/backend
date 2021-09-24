@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-from typing import Any
 
-import orjson
 from pydantic import BaseModel as PydanticBaseModel
 
-
-def orjson_dumps(v: Any, *, default: Any) -> str:
-    # orjson.dumps returns bytes, to match standard json.dumps we need to decode
-    return orjson.dumps(v, default=default).decode()
+from api.core.serializers import orjson, orjson_dumps
 
 
 class BaseModel(PydanticBaseModel):
