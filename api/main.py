@@ -7,6 +7,7 @@ from api.core.exceptions.handlers import (
     authentication_provider_error_handler,
     unauthorized_user_handler,
 )
+from api.core.logging.settings import setup_logging
 from api.utils.database import create_super_user
 
 from .routers import login, users
@@ -43,6 +44,7 @@ app.include_router(login.router)
 
 @app.on_event("startup")
 async def init_db() -> None:
+    setup_logging()
     await create_super_user()
 
 
