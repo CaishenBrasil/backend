@@ -2,6 +2,7 @@ version: "3"
 
 volumes:
     app-db-data:
+    elasticsearch_data:
 
 services:
     traefik:
@@ -31,10 +32,46 @@ services:
 
     redis:
         image: redis:alpine
+        command: --port 6380
         expose:
-            - 6379
+            - 6380
         env_file:
             - .env
+    elasticsearch:
+        image: elasticsearch:7.11.1
+        environment:
+            - discovery.type=single-node
+        volumes:
+            - elasticsearch_data:/usr/share/elasticsearch/data
+        mem_limit: "1g"
+    redis-log:
+        image: redis:alpine
+        expose:
+            - 6379
+    logstash-agent:
+        image: logstash:7.11.1
+        volumes:
+            - ./logstash:/etc/logstash
+        command: logstash -f /etc/logstash/agent.conf
+        depends_on:
+            - elasticsearch
+        ports:
+            - 12201:12201/udp
+    logstash-central:
+        image: logstash:7.11.1
+        volumes:
+            - ./logstash:/etc/logstash
+        command: logstash -f /etc/logstash/central.conf
+        depends_on:
+            - elasticsearch
+    kibana:
+        image: kibana:7.11.1
+        ports:
+            - 5601:5601
+        environment:
+            - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+        depends_on:
+            - elasticsearch
     web:
         build:
             context: .
@@ -48,3 +85,8 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.fastapi.rule=Host(`localhost`)"
+        logging:
+            driver: gelf
+            options:
+                gelf-address: "udp://localhost:12201" # Logstash UDP input port
+                tag: "caishenapp"
