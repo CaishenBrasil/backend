@@ -49,7 +49,10 @@ async def exchange_auth_token_for_access_cookie_token(
                 file_name=__name__,
                 function_name="exchange_auth_token_for_access_cookie_token",
                 detail=f"Could not fetch user id {token_data.sub} from database",
-                request=request,
+                scheme=request["scheme"],
+                method=request["method"],
+                root_path=request["root_path"],
+                path=request["path"],
                 msg="User is not authorized",
             )
         )
@@ -94,7 +97,10 @@ async def login_access_token(
                 file_name=__name__,
                 function_name="exchange_auth_token_for_access_cookie_token",
                 detail="User provided incorrect email or password",
-                request=request,
+                scheme=request["scheme"],
+                method=request["method"],
+                root_path=request["root_path"],
+                path=request["path"],
                 status_code=status.HTTP_400_BAD_REQUEST,
                 msg="Incorrect email or password",
             )
@@ -170,7 +176,10 @@ async def google_login_callback(
                 function_name="google_login_callback",
                 event="Authentication Provider Missmatch",
                 detail=f"User is already registered with {db_user.auth_provider} provider",
-                request=request,
+                scheme=request["scheme"],
+                method=request["method"],
+                root_path=request["root_path"],
+                path=request["path"],
                 status_code=status.HTTP_409_CONFLICT,
                 msg=f"User is already registered with another provider, \
                 please use {db_user.auth_provider} provider to log-in",
