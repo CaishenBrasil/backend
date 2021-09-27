@@ -1,6 +1,7 @@
 # caishen-user-api
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/CaishenBrasil/caishen-user-api/dev.svg)](https://results.pre-commit.ci/latest/github/CaishenBrasil/caishen-user-api/dev)
 
 :warning: Added ModifiedPostgreSqlDsn on `settings.py` as a hack until pydantic gets updated because drivers are not yet permitted on PostgresDsn schemes. Example: `postgresql+asyncpg`
 
