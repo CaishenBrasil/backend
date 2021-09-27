@@ -39,7 +39,10 @@ async def create_user(
             file_name=__name__,
             function_name="create_user",
             detail=f"User {current_user.id} is not admin and cannot create other users",
-            request=request,
+            scheme=request["scheme"],
+            method=request["method"],
+            root_path=request["root_path"],
+            path=request["path"],
             msg="You are not authorized to create users",
         )
     )
@@ -69,7 +72,10 @@ async def update_user(
             file_name=__name__,
             function_name="update_user",
             detail=f"User {current_user.id} is not admin and cannot update other users",
-            request=request,
+            scheme=request["scheme"],
+            method=request["method"],
+            root_path=request["root_path"],
+            path=request["path"],
             msg="You don't have permission to update users",
         )
     )
@@ -126,7 +132,10 @@ async def delete_user(
             file_name=__name__,
             function_name="delete_user",
             detail=f"User {current_user.id} is not admin and cannot delete other users",
-            request=request,
+            scheme=request["scheme"],
+            method=request["method"],
+            root_path=request["root_path"],
+            path=request["path"],
             msg="You don't have permission to delete users",
         )
     )
@@ -149,7 +158,10 @@ async def get_multi_users(
             file_name=__name__,
             function_name="get_multi_users",
             detail=f"User {current_user.id} is not admin and cannot fetch other users info",
-            request=request,
+            scheme=request["scheme"],
+            method=request["method"],
+            root_path=request["root_path"],
+            path=request["path"],
             msg="You don't have permission to retrieve users",
         )
     )

@@ -40,6 +40,6 @@ async def create_super_user() -> None:
         db_super_user = await user.get_by_email(session=session, email=email)
         if db_super_user is None:
             _ = await user.create_local(session=session, obj_in=super_user_in)
-            logger.info("Created SuperUser on DB")
-        logger.info("SuperUser is already created on DB")
+            await logger.info("Created SuperUser on DB")
+        await logger.info("SuperUser is already created on DB")
     return

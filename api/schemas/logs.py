@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from fastapi import status
 
@@ -15,7 +15,10 @@ class BaseLog(BaseModel):
 
 
 class BaseHTTPRequestLog(BaseLog):
-    request: Optional[Dict[str, Any]] = None
+    scheme: Optional[str] = None
+    method: Optional[str] = None
+    root_path: Optional[str] = None
+    path: Optional[str] = None
 
 
 class BaseHTTPResponseLog(BaseHTTPRequestLog):

@@ -44,7 +44,7 @@ app.include_router(login.router)
 
 @app.on_event("startup")
 async def init_db() -> None:
-    setup_logging()
+    await setup_logging()
     await create_super_user()
 
 

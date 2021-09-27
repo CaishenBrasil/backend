@@ -1,7 +1,6 @@
-version: "3"
-
 volumes:
     app-db-data:
+    elasticsearch_data:
 
 services:
     traefik:
@@ -12,12 +11,16 @@ services:
             - "--providers.docker=true"
             - "--providers.docker.exposedbydefault=false"
             - "--entrypoints.web.address=:80"
+            - "--entrypoints.kibana.address=:5601"
         restart: always
         ports:
             - "8000:80"
             - "8080:8080"
+            - "8001:5601"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+        labels:
+            - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)"
     db:
         image: postgres:13-alpine
         expose:
@@ -35,6 +38,38 @@ services:
             - 6379
         env_file:
             - .env
+    elasticsearch:
+        image: elasticsearch:7.11.1
+        environment:
+            - discovery.type=single-node
+        volumes:
+            - elasticsearch_data:/usr/share/elasticsearch/data
+        mem_limit: "1g"
+    logstash_agent:
+        image: logstash:7.11.1
+        volumes:
+            - ./logstash:/etc/logstash
+        command: logstash -f /etc/logstash/agent.conf
+        depends_on:
+            - elasticsearch
+        ports:
+            - 12201:12201/udp
+    logstash_central:
+        image: logstash:7.11.1
+        volumes:
+            - ./logstash:/etc/logstash
+        command: logstash -f /etc/logstash/central.conf
+        depends_on:
+            - elasticsearch
+    kibana:
+        image: kibana:7.11.1
+        environment:
+            - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+        depends_on:
+            - elasticsearch
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.kibana.rule=Host(`kibana.localhost`)"
     web:
         build:
             context: .
@@ -42,9 +77,17 @@ services:
         environment:
             APP_MODULE: api.main:app
             PRE_START_PATH: scripts/prestart.sh
+            GUNICORN_CONF: gunicorn_config.py
+            GUNICORN_CMD_ARGS: "--logger-class gunicorn_config.GunicornLogger"
         depends_on:
             - db
             - redis
+            - logstash_agent
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.fastapi.rule=Host(`localhost`)"
+        logging:
+            driver: gelf
+            options:
+                gelf-address: "udp://localhost:12201" # Logstash UDP input port
+                tag: "caishenapp"
