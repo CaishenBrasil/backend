@@ -2,6 +2,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+from api.core.logging.caishen_logger import logger
 from api.crud import user
 from api.schemas import UserLocalCreate
 from api.settings import settings
@@ -39,5 +40,6 @@ async def create_super_user() -> None:
         db_super_user = await user.get_by_email(session=session, email=email)
         if db_super_user is None:
             _ = await user.create_local(session=session, obj_in=super_user_in)
-
+            logger.info("Created SuperUser on DB")
+        logger.info("SuperUser is already created on DB")
     return

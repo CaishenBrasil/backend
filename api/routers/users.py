@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import crud, models, schemas
+from api.core.exceptions import UnAuthorizedUser
 from api.dependencies import get_current_user, get_session
 from api.settings import settings
 
@@ -18,6 +19,7 @@ async def create_user(
     session: AsyncSession = Depends(get_session),
     user_in: schemas.UserLocalCreate,
     current_user: models.User = Depends(get_current_user),
+    request: Request,
 ) -> Any:
     """
     Create new user.
@@ -32,9 +34,14 @@ async def create_user(
         user = await crud.user.create_local(session, obj_in=user_in)
         # todo: send e-mail
         return user
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="You don't have permission to create users.",
+    raise UnAuthorizedUser(
+        log=schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="create_user",
+            detail=f"User {current_user.id} is not admin and cannot create other users",
+            request=request,
+            msg="You are not authorized to create users",
+        )
     )
 
 
@@ -44,6 +51,7 @@ async def update_user(
     session: AsyncSession = Depends(get_session),
     user_in: schemas.UserUpdate,
     current_user: models.User = Depends(get_current_user),
+    request: Request,
 ) -> Any:
     """
     Update user.
@@ -56,10 +64,14 @@ async def update_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist."
         )
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="You don't have permission to update users.",
+    raise UnAuthorizedUser(
+        log=schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="update_user",
+            detail=f"User {current_user.id} is not admin and cannot update other users",
+            request=request,
+            msg="You don't have permission to update users",
+        )
     )
 
 
@@ -99,6 +111,7 @@ async def delete_user(
     session: AsyncSession = Depends(get_session),
     user_id: int,
     current_user: models.User = Depends(get_current_user),
+    request: Request,
 ) -> Any:
     """Delete a user"""
     if crud.user.is_admin(current_user):
@@ -108,15 +121,20 @@ async def delete_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist."
         )
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="You don't have permission to delete users.",
+    raise UnAuthorizedUser(
+        log=schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="delete_user",
+            detail=f"User {current_user.id} is not admin and cannot delete other users",
+            request=request,
+            msg="You don't have permission to delete users",
+        )
     )
 
 
 @router.get("/", response_model=List[schemas.UserRead])
 async def get_multi_users(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     offset: int = 0,
     limit: int = 100,
@@ -126,8 +144,12 @@ async def get_multi_users(
     if crud.user.is_admin(current_user):
         users = await crud.user.get_multi(session, skip=offset, limit=limit)
         return users
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="You don't have permission to retrieve users.",
+    raise UnAuthorizedUser(
+        log=schemas.UnAuthorizedUserLog(
+            file_name=__name__,
+            function_name="get_multi_users",
+            detail=f"User {current_user.id} is not admin and cannot fetch other users info",
+            request=request,
+            msg="You don't have permission to retrieve users",
+        )
     )

@@ -6,15 +6,22 @@ from typing import Optional
 
 import httpx
 from aioredis.client import Redis
+from fastapi import status
 from oauthlib.oauth2 import WebApplicationClient
 
 from api.core.exceptions import (
     DiscoveryDocumentError,
     ProviderConnectionError,
-    UnauthorizedUser,
+    UnAuthorizedUser,
     UnknownAuthenticationProvider,
 )
-from api.schemas import ExternalAuthToken, ExternalUser, RequestUriParams
+from api.schemas import (
+    AuthenticationProviderLog,
+    ExternalAuthToken,
+    ExternalUser,
+    RequestUriParams,
+    UnAuthorizedUserLog,
+)
 from api.settings import settings
 
 from .security import create_state_csrf_token
@@ -100,7 +107,15 @@ class GoogleAuthProvider(AuthProvider):
             userinfo_endpoint = discovery_document["userinfo_endpoint"]
         except KeyError as exc:
             raise DiscoveryDocumentError(
-                f"Could not parse Google's discovery document: {repr(exc)}"
+                log=AuthenticationProviderLog(
+                    file_name=__name__,
+                    class_name=type(self).__class__,
+                    function_name="get_user",
+                    event="Failed to fetch required keys from Discovery Document",
+                    detail=f"Could not parse Google's discovery document: {repr(exc)}",
+                    msg="Could not parse Google's discovery document",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
             )
 
         # Request access_token from Google
@@ -125,7 +140,15 @@ class GoogleAuthProvider(AuthProvider):
 
         except Exception as exc:
             raise ProviderConnectionError(
-                f"Could not get Google's access token: {repr(exc)}"
+                log=AuthenticationProviderLog(
+                    file_name=__name__,
+                    class_name=type(self).__class__,
+                    function_name="get_user",
+                    event="Failed to connect with AuthProvider",
+                    detail=f"Could not get Google's access token: {repr(exc)}",
+                    msg="Could not get Google's access token",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
             )
 
         # Request user's information from Google
@@ -135,7 +158,16 @@ class GoogleAuthProvider(AuthProvider):
             userinfo = userinfo_response.json()
 
         if userinfo.get("email_verified") is None:
-            raise UnauthorizedUser("User account not verified by Google.")
+            raise UnAuthorizedUser(
+                log=UnAuthorizedUserLog(
+                    file_name=__name__,
+                    class_name=type(self).__class__,
+                    function_name="get_user",
+                    detail="User's email is not verified by Google",
+                    msg="User account not verified by Google.",
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                )
+            )
         else:
             external_user = ExternalUser(
                 email=userinfo["email"],
@@ -152,7 +184,15 @@ class GoogleAuthProvider(AuthProvider):
             authorization_endpoint = discovery_document["authorization_endpoint"]
         except KeyError as exc:
             raise ProviderConnectionError(
-                f"Could not parse Google's discovery document: {repr(exc)}"
+                log=AuthenticationProviderLog(
+                    file_name=__name__,
+                    class_name=type(self).__class__,
+                    function_name="get_request_uri",
+                    event="Failed to connect with AuthProvider",
+                    detail=f"Could not parse Google's discovery document: {repr(exc)}",
+                    msg="Could not parse Google's discovery document",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
             )
 
         state_csrf_token = await create_state_csrf_token(self.cache)
@@ -175,7 +215,15 @@ class GoogleAuthProvider(AuthProvider):
                 discovery_document = response.json()
         except Exception as exc:
             raise ProviderConnectionError(
-                f"Could not get Google's discovery document: {repr(exc)}"
+                log=AuthenticationProviderLog(
+                    file_name=__name__,
+                    class_name=type(self).__class__,
+                    function_name="_get_discovery_document",
+                    event="Failed to connect with AuthProvider",
+                    detail=f"Could not get Google's discovery document: {repr(exc)}",
+                    msg="Could not get Google's discovery document",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
             )
 
         return discovery_document
@@ -196,4 +244,13 @@ async def get_auth_provider(auth_provider: str) -> Optional[AuthProvider]:
         except KeyError:
             continue
 
-    raise UnknownAuthenticationProvider(auth_provider)
+    raise UnknownAuthenticationProvider(
+        log=AuthenticationProviderLog(
+            file_name=__name__,
+            function_name="_get_discovery_document",
+            event="Failed to get correct AuthProvider",
+            detail="The authentication provider requested is not known",
+            msg="The authentication provider requested is not known",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    )

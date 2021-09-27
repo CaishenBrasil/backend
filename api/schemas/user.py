@@ -3,8 +3,10 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import EmailStr, Field
 from pydantic.types import UUID4
+
+from .base import BaseModel, BaseModelORM
 
 
 class AuthProvider(str, Enum):
@@ -13,16 +15,11 @@ class AuthProvider(str, Enum):
     LOCAL = "LOCAL"
 
 
-class UserBase(BaseModel):
+class UserBase(BaseModelORM):
     name: str
     birth_date: date
     email: EmailStr
     is_admin: bool
-
-    class Config:
-        orm_mode = True
-        anystr_strip_whitespace = True
-        validate_assignment = True
 
 
 class UserCreate(UserBase):
