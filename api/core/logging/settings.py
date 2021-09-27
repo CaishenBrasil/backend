@@ -19,17 +19,18 @@ def censor_password(_, __, event_dict: Dict[str, Any]) -> Dict[str, Any]:  # typ
     return event_dict
 
 
+shared_processors: Tuple[structlog.types.Processor, ...] = (
+    structlog.contextvars.merge_contextvars,
+    structlog.stdlib.add_log_level,
+    structlog.stdlib.add_logger_name,
+    censor_password,
+    structlog.processors.TimeStamper(fmt="iso", utc=False),
+)
+
+
 class LogSettings(BaseSettings):
 
-    shared_processors: Tuple[structlog.types.Processor, ...] = (
-        structlog.contextvars.merge_contextvars,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.add_logger_name,
-        censor_password,
-        structlog.processors.TimeStamper(fmt="iso", utc=False),
-    )
-
-    version: float = 1
+    version: int = 1
     disable_existing_loggers: bool = False
     formatters: Dict[Any, Any] = {
         "json": {
@@ -79,11 +80,11 @@ class LogSettings(BaseSettings):
 logging_settings = LogSettings()
 
 
-def setup_logging() -> None:
+async def setup_logging() -> None:
     structlog.configure(
         processors=[
             structlog.stdlib.filter_by_level,
-            *logging_settings.shared_processors,
+            *shared_processors,
             structlog.stdlib.PositionalArgumentsFormatter(),
             structlog.processors.StackInfoRenderer(),
             structlog.dev.set_exc_info,
@@ -92,8 +93,8 @@ def setup_logging() -> None:
         ],
         context_class=dict,
         logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
+        wrapper_class=structlog.stdlib.AsyncBoundLogger,
         cache_logger_on_first_use=True,
     )
     logging.config.dictConfig(logging_settings.dict())
-    logger.info("Finished configuring Logger")
+    await logger.info("Finished configuring Logger")

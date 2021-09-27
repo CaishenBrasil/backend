@@ -28,7 +28,7 @@ async def database_connection_error_handler(
     request: Request,
     exc: DatabaseConnectionError,
 ) -> JSONResponse:
-    logger.exception("Failed to connect to the database", repr(exc))
+    await logger.exception("Failed to connect to the database", repr(exc))
     headers = getattr(exc, "headers", None)
     return await return_exception_response(
         detail="An error has occurred. Please try again.",
@@ -40,7 +40,7 @@ async def database_connection_error_handler(
 async def unauthorized_user_handler(
     request: Request, exc: UnAuthorizedUser
 ) -> JSONResponse:
-    logger.warning(**exc.log.dict())
+    await logger.warning(**exc.log.dict())
     headers = getattr(exc, "headers", None)
     return await return_exception_response(
         detail=exc.log.msg,
@@ -53,7 +53,7 @@ async def authentication_provider_error_handler(
     request: Request,
     exc: AuthenticationProviderException,
 ) -> JSONResponse:
-    logger.error(**exc.log.dict())
+    await logger.error(**exc.log.dict())
     headers = getattr(exc, "headers", None)
     return await return_exception_response(
         detail=exc.log.msg,
