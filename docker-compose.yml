@@ -10,13 +10,11 @@ services:
             - "--api.insecure=true"
             - "--providers.docker=true"
             - "--providers.docker.exposedbydefault=false"
-            - "--entrypoints.web.address=:80"
-            - "--entrypoints.kibana.address=:5601"
+            - "--entrypoints.http.address=:80"
         restart: always
         ports:
             - "8000:80"
             - "8080:8080"
-            - "8001:5601"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
         labels:
@@ -31,7 +29,18 @@ services:
             - .env
         environment:
             PGDATA: /var/lib/postgresql/data/pgdata
-
+    pgadmin:
+        image: dpage/pgadmin4
+        depends_on:
+            - db
+        env_file:
+            - .env
+        expose:
+            - 80
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.pgadmin.entrypoints=http"
+            - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.localhost`)"
     redis:
         image: redis:alpine
         expose:
@@ -69,6 +78,7 @@ services:
             - elasticsearch
         labels:
             - "traefik.enable=true"
+            - "traefik.http.routers.kibana.entrypoints=http"
             - "traefik.http.routers.kibana.rule=Host(`kibana.localhost`)"
     web:
         build:
@@ -85,6 +95,7 @@ services:
             - logstash_agent
         labels:
             - "traefik.enable=true"
+            - "traefik.http.routers.fastapi.entrypoints=http"
             - "traefik.http.routers.fastapi.rule=Host(`localhost`)"
         logging:
             driver: gelf
