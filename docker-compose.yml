@@ -1,5 +1,3 @@
-version: "3"
-
 volumes:
     app-db-data:
     elasticsearch_data:
@@ -13,12 +11,16 @@ services:
             - "--providers.docker=true"
             - "--providers.docker.exposedbydefault=false"
             - "--entrypoints.web.address=:80"
+            - "--entrypoints.kibana.address=:5601"
         restart: always
         ports:
             - "8000:80"
             - "8080:8080"
+            - "8001:5601"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+        labels:
+            - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)"
     db:
         image: postgres:13-alpine
         expose:
@@ -61,12 +63,13 @@ services:
             - elasticsearch
     kibana:
         image: kibana:7.11.1
-        ports:
-            - 5601:5601
         environment:
             - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
         depends_on:
             - elasticsearch
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.kibana.rule=Host(`kibana.localhost`)"
     web:
         build:
             context: .
@@ -74,6 +77,8 @@ services:
         environment:
             APP_MODULE: api.main:app
             PRE_START_PATH: scripts/prestart.sh
+            GUNICORN_CONF: gunicorn_config.py
+            GUNICORN_CMD_ARGS: "--logger-class gunicorn_config.GunicornLogger"
         depends_on:
             - db
             - redis
