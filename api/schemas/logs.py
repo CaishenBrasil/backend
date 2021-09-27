@@ -15,10 +15,10 @@ class BaseLog(BaseModel):
 
 
 class BaseHTTPRequestLog(BaseLog):
-    scheme: str
-    method: str
-    root_path: str
-    path: str
+    scheme: Optional[str] = None
+    method: Optional[str] = None
+    root_path: Optional[str] = None
+    path: Optional[str] = None
 
 
 class BaseHTTPResponseLog(BaseHTTPRequestLog):
