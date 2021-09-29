@@ -96,7 +96,9 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.fastapi.entrypoints=http"
-            - "traefik.http.routers.fastapi.rule=Host(`localhost`)"
+            - "traefik.http.routers.fastapi.rule=Host(`localhost`) && PathPrefix(`/api/v1`)"
+            - "traefik.http.middlewares.api-stripprefix.stripprefix.prefixes=/api/v1"
+            - "traefik.http.routers.fastapi.middlewares=api-stripprefix"
         logging:
             driver: gelf
             options:

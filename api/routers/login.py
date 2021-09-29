@@ -25,7 +25,7 @@ from api.dependencies.cache import get_cache
 from api.schemas.user import UserCreate
 from api.settings import settings
 
-prefix = settings.API_VERSION_STR + "/login"
+prefix = "/login"
 router = APIRouter(prefix=prefix, tags=["Login"])
 
 csrf_token_validation = CSRFTokenRedirectCookieBearer()
@@ -64,7 +64,7 @@ async def exchange_auth_token_for_access_cookie_token(
     )
 
     # Redirect the user to the home page
-    redirect_url = settings.API_VERSION_STR + "/users/me"
+    redirect_url = settings.ROOT_PATH + "/users/me"
     response = RedirectResponse(url=redirect_url)
 
     # Set state cookie
@@ -191,7 +191,7 @@ async def google_login_callback(
     auth_token = await create_auth_token(db_user.id, cache)
 
     # Redirect the user to the home page
-    redirect_url = settings.API_VERSION_STR + "/login"
+    redirect_url = settings.ROOT_PATH + "/login"
     response = RedirectResponse(url=redirect_url)
 
     # Set state cookie

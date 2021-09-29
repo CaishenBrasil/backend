@@ -7,9 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api import crud, models, schemas
 from api.core.exceptions import UnAuthorizedUser
 from api.dependencies import get_current_user, get_session
-from api.settings import settings
 
-prefix = settings.API_VERSION_STR + "/users"
+prefix = "/users"
 router = APIRouter(prefix=prefix, tags=["User"])
 
 

@@ -16,8 +16,19 @@ class ModifiedPostgresDsn(PostgresDsn):
 
 class Settings(BaseSettings):
     # General Parameters
+    VERSION: int = 1
+    ROOT_PATH: str = None
 
-    API_VERSION_STR: str = "/api/v1"
+    @validator("ROOT_PATH", pre=True)
+    def create_root_path_from_version(
+        cls, v: Optional[str], values: Dict[str, Any]
+    ) -> str:
+        """
+        ROOT_PATH is always overridden with /api/v{version} even if ROOT_PATH is provided in env
+        """
+        version = values.get("VERSION")
+        return f"/api/v{version}"
+
     PROJECT_NAME: str = "Caishen App Development Server"
     DEV: bool = True
     FRONTEND_URL: Optional[HttpUrl] = None

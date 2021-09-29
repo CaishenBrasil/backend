@@ -161,7 +161,7 @@ class AccessTokenValidator:
     """
 
     async def __call__(self, request: Request) -> schemas.TokenPayload:
-        token_url = settings.API_VERSION_STR + "/login/access-token"
+        token_url = settings.ROOT_PATH + "/login/access-token"
 
         authorization: str = request.headers.get("Authorization")
         if authorization:

@@ -16,6 +16,7 @@ from .settings import settings
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="This API handles User Accounts for the Caishen App",
+    root_path=settings.ROOT_PATH,
 )
 
 # Add Custom Exception Handlers
