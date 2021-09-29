@@ -80,12 +80,23 @@ class Settings(BaseSettings):
 
     REDIS_URI: RedisDsn
 
-    # GOOGLE AUTH PROVIDERS
-    GOOGLE = "google-oidc"
+    # GOOGLE AUTH PROVIDER
+    GOOGLE: str = "google-oidc"
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
     GOOGLE_REDIRECT_URL: AnyHttpUrl
     GOOGLE_DISCOVERY_URL: HttpUrl
+
+    # FACEBOOK AUTH PROVIDER
+
+    FACEBOOK: str = "facebook-login"
+    FACEBOOK_CLIENT_ID: str
+    FACEBOOK_CLIENT_SECRET: str
+    FACEBOOK_REDIRECT_URL: AnyHttpUrl
+    FACEBOOK_DISCOVERY_URL: AnyHttpUrl
+    FACEBOOK_AUTHORIZATION_ENDPOINT: AnyHttpUrl
+    FACEBOOK_TOKEN_ENDPOINT: AnyHttpUrl
+    FACEBOOK_USERINFO_ENDPOINT: AnyHttpUrl
 
     # CORS
 

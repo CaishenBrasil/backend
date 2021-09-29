@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from typing import Any, List
+from typing import List, Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,7 +20,7 @@ async def create_user(
     user_in: schemas.UserLocalCreate,
     current_user: models.User = Depends(get_current_user),
     request: Request,
-) -> Any:
+) -> Optional[models.User]:
     """
     Create new user.
     """
@@ -54,7 +55,7 @@ async def update_user(
     user_in: schemas.UserUpdate,
     current_user: models.User = Depends(get_current_user),
     request: Request,
-) -> Any:
+) -> Optional[models.User]:
     """
     Update user.
     """
@@ -83,7 +84,7 @@ async def update_user(
 @router.get("/me", response_model=schemas.UserRead)
 async def read_current_user(
     current_user: models.User = Depends(get_current_user),
-) -> Any:
+) -> Optional[models.User]:
     """
     Get current user.
     """
@@ -96,7 +97,7 @@ async def update_current_user(
     session: AsyncSession = Depends(get_session),
     user_in: schemas.UserUpdate,
     current_user: models.User = Depends(get_current_user),
-) -> Any:
+) -> Optional[models.User]:
     """
     Update current user.
     """
@@ -110,14 +111,25 @@ async def update_current_user(
     return user
 
 
+@router.delete("/me", response_model=schemas.UserRead)
+async def delete_current_user(
+    *,
+    session: AsyncSession = Depends(get_session),
+    current_user: models.User = Depends(get_current_user),
+    request: Request,
+) -> Optional[models.User]:
+
+    return await crud.user.delete(session, id=current_user.id)
+
+
 @router.delete("/{user_id}", response_model=schemas.UserRead)
 async def delete_user(
     *,
     session: AsyncSession = Depends(get_session),
-    user_id: int,
+    user_id: UUID,
     current_user: models.User = Depends(get_current_user),
     request: Request,
-) -> Any:
+) -> Optional[models.User]:
     """Delete a user"""
     if crud.user.is_admin(current_user):
         user = await crud.user.get(session, user_id)
@@ -147,7 +159,7 @@ async def get_multi_users(
     offset: int = 0,
     limit: int = 100,
     current_user: models.User = Depends(get_current_user),
-) -> Any:
+) -> Optional[List[models.User]]:
     """Retrieve a list of users"""
     if crud.user.is_admin(current_user):
         users = await crud.user.get_multi(session, skip=offset, limit=limit)

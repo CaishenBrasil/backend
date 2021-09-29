@@ -32,6 +32,25 @@ class CSRFTokenRedirectCookieBearer:
         # State token from redirect
         state_csrf_token: str = request.query_params.get("state")
 
+        if state_csrf_token is None:
+            # Check for Error from Facebook
+            error_reason = request.query_params.get("error_reason")
+            error_message = request.query_params.get(
+                "error_message"
+            ) or request.query_params.get("error_description")
+            raise UnAuthorizedUser(
+                log=schemas.UnAuthorizedUserLog(
+                    file_name=__name__,
+                    class_name=type(self).__name__,
+                    detail=f"Reason: {error_reason}\nError Message: {error_message}",
+                    scheme=request["scheme"],
+                    method=request["method"],
+                    root_path=request["root_path"],
+                    path=request["path"],
+                    msg="User did not authorize login",
+                )
+            )
+
         return await validate_state_csrf_token(state_csrf_token, cache)
 
 

@@ -54,3 +54,4 @@ class ExternalUser(BaseModel):
     sub: str
     email: EmailStr
     name: str
+    birthday: Optional[date]

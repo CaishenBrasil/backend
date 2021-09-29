@@ -34,3 +34,9 @@ class ExternalAuthToken(Token):
 
 class TokenPayload(BaseModel):
     sub: Optional[UUID4] = None
+
+
+class FacebookAccessToken(BaseModel):
+    token_type: str
+    access_token: str
+    expires_in: str
