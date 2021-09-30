@@ -193,7 +193,7 @@ async def google_login_callback(
     auth_token = await create_auth_token(db_user.id, cache)
 
     # Redirect the user to the home page
-    redirect_url = settings.ROOT_PATH + "/login"
+    redirect_url = settings.ROOT_PATH + "/login/"
     response = RedirectResponse(url=redirect_url)
 
     # Set state cookie
@@ -220,9 +220,8 @@ async def facebook_login(
 
     params = await provider.get_request_uri()
     request_uri = params.uri
-    response = RedirectResponse(url=request_uri)
 
-    return response
+    return RedirectResponse(url=request_uri)
 
 
 @router.get("/facebook-login-callback")
@@ -292,7 +291,7 @@ async def facebook_login_callback(
     auth_token = await create_auth_token(db_user.id, cache)
 
     # Redirect the user to the home page
-    redirect_url = settings.ROOT_PATH + "/login"
+    redirect_url = settings.ROOT_PATH + "/login/"
     response = RedirectResponse(url=redirect_url)
 
     # Set state cookie
