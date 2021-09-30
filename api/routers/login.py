@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
-from typing import Dict, Optional
+from typing import Optional
 
 from aioredis.client import Redis
 from fastapi import APIRouter, Depends, Request, status
@@ -15,7 +15,7 @@ from api.core.exceptions import (
     UnAuthorizedUser,
 )
 from api.dependencies import get_session
-from api.dependencies.auth.providers import GoogleAuthProvider
+from api.dependencies.auth.providers import FacebookAuthProvider, GoogleAuthProvider
 from api.dependencies.auth.schemes import (
     AuthTokenCookieBearer,
     CSRFTokenRedirectCookieBearer,
@@ -116,7 +116,7 @@ async def login_access_token(
 async def google_login(cache: Redis = Depends(get_cache)) -> Optional[RedirectResponse]:
     """Redirects the user to the external authentication pop-up
     Args:
-            auth_provider: The authentication provider (i.e google-iodc)
+            auth_provider: The authentication provider (i.e google-oidc)
     Returns:
             Redirect response to the external provider's auth endpoint
     """
@@ -181,8 +181,10 @@ async def google_login_callback(
                 root_path=request["root_path"],
                 path=request["path"],
                 status_code=status.HTTP_409_CONFLICT,
-                msg=f"User is already registered with another provider, \
-                please use {db_user.auth_provider} provider to log-in",
+                msg=(
+                    "User is already registered with another provider, "
+                    f"please use {db_user.auth_provider} provider to log-in"
+                ),
                 current_provider=db_user.auth_provider,
                 failed_provider="GOOGLE",
             )
@@ -205,5 +207,97 @@ async def google_login_callback(
 @router.get(
     "/facebook-login", tags=["Social Login"], description="Facebook Oauth Login"
 )
-def facebook_login() -> Dict:
-    return {"message": "This is supposed to be the Facebook login endpoint"}
+async def facebook_login(
+    cache: Redis = Depends(get_cache),
+) -> Optional[RedirectResponse]:
+    """Redirects the user to the external authentication pop-up
+    Args:
+            auth_provider: The authentication provider (i.e facebook-login)
+    Returns:
+            Redirect response to the external provider's auth endpoint
+    """
+    provider = FacebookAuthProvider(client_id=settings.FACEBOOK_CLIENT_ID, cache=cache)
+
+    params = await provider.get_request_uri()
+    request_uri = params.uri
+    response = RedirectResponse(url=request_uri)
+
+    return response
+
+
+@router.get("/facebook-login-callback")
+async def facebook_login_callback(
+    request: Request,
+    _: CSRFTokenRedirectCookieBearer = Depends(csrf_token_validation),
+    session: AsyncSession = Depends(get_session),
+    cache: Redis = Depends(get_cache),
+) -> Optional[RedirectResponse]:
+    """Callback triggered when the user logs in to Facebook's pop-up.
+    Receives an authentication_token from Facebook which then
+    exchanges for an access_token. The latter is used to
+    gain user information from Facebook's userinfo_endpoint.
+    Args:
+            request: The incoming request as redirected by Facebook
+    """
+
+    code = request.query_params.get("code")
+
+    if not code:
+        raise AuthorizationException("Missing external authentication token")
+
+    provider = FacebookAuthProvider(client_id=settings.FACEBOOK_CLIENT_ID, cache=cache)
+
+    # Authenticate token and get user's info from external provider
+    external_user = await provider.get_user(
+        auth_token=schemas.ExternalAuthToken(code=code)
+    )
+
+    # Get or create the internal user
+    db_user = await crud.user.get_by_email(session, email=external_user.email)
+
+    if db_user is None:
+        db_user = await crud.user.create(
+            session,
+            obj_in=UserCreate(
+                name=external_user.name,
+                birth_date=external_user.birthday
+                if external_user.birthday
+                else datetime.now().date(),
+                email=external_user.email,
+                is_admin=False,
+                auth_provider="FACEBOOK",
+            ),
+        )
+    elif db_user.auth_provider != "FACEBOOK":
+        raise AuthenticationProviderMissmatch(
+            log=schemas.AuthenticationProviderLog(
+                file_name=__name__,
+                function_name="facebook_login_callback",
+                event="Authentication Provider Missmatch",
+                detail=f"User is already registered with {db_user.auth_provider} provider",
+                scheme=request["scheme"],
+                method=request["method"],
+                root_path=request["root_path"],
+                path=request["path"],
+                status_code=status.HTTP_409_CONFLICT,
+                msg=(
+                    "User is already registered with another provider, "
+                    f"please use {db_user.auth_provider} provider to log-in"
+                ),
+                current_provider=db_user.auth_provider,
+                failed_provider="FACEBOOK",
+            )
+        )
+
+    auth_token = await create_auth_token(db_user.id, cache)
+
+    # Redirect the user to the home page
+    redirect_url = settings.ROOT_PATH + "/login"
+    response = RedirectResponse(url=redirect_url)
+
+    # Set state cookie
+    response.set_cookie(
+        key="auth_token", value=f"Bearer {auth_token.code}", httponly=True
+    )
+
+    return response

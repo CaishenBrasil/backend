@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .auth import RequestUriParams
+from .auth import FacebookAccessTokenParams, RequestUriParams
 from .logs import (
     AuthenticationProviderLog,
     BaseHTTPRequestLog,
@@ -12,6 +12,7 @@ from .token import (
     AuthToken,
     CSRFToken,
     ExternalAuthToken,
+    FacebookAccessToken,
     Token,
     TokenPayload,
 )

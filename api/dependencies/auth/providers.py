@@ -2,6 +2,7 @@
 import json
 import logging
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Optional
 
 import httpx
@@ -19,6 +20,8 @@ from api.schemas import (
     AuthenticationProviderLog,
     ExternalAuthToken,
     ExternalUser,
+    FacebookAccessToken,
+    FacebookAccessTokenParams,
     RequestUriParams,
     UnAuthorizedUserLog,
 )
@@ -170,9 +173,10 @@ class GoogleAuthProvider(AuthProvider):
             )
         else:
             external_user = ExternalUser(
+                sub=userinfo["sub"],
                 email=userinfo["email"],
                 name=userinfo["name"],
-                sub=userinfo["sub"],
+                birthday="1900-01-01",
             )
 
             return external_user
@@ -254,3 +258,128 @@ async def get_auth_provider(auth_provider: str) -> Optional[AuthProvider]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
     )
+
+
+class FacebookAuthProvider(AuthProvider):
+    """Facebook authentication class for authenticating users and
+    requesting user's information via Facebook Login flow.
+    """
+
+    @staticmethod
+    async def meets_condition(auth_provider: str) -> bool:
+        return auth_provider == settings.FACEBOOK
+
+    async def get_user(self, auth_token: ExternalAuthToken) -> ExternalUser:
+
+        # Exchange Facebook Auth Token for Facebook Access Token
+        token_endpoint = settings.FACEBOOK_TOKEN_ENDPOINT
+
+        try:
+            async with httpx.AsyncClient() as client:
+
+                token_url_params = FacebookAccessTokenParams(
+                    redirect_uri=settings.FACEBOOK_REDIRECT_URL,
+                    code=auth_token.code,
+                    client_id=settings.FACEBOOK_CLIENT_ID,
+                    client_secret=settings.FACEBOOK_CLIENT_SECRET,
+                )
+
+                token_response = await client.get(
+                    token_endpoint, params=token_url_params.dict()
+                )
+
+                token = token_response.json()
+
+                facebook_token = FacebookAccessToken(
+                    token_type=token["token_type"],
+                    access_token=token["access_token"],
+                    expires_in=token["expires_in"],
+                )
+
+        except Exception as exc:
+            raise ProviderConnectionError(
+                log=AuthenticationProviderLog(
+                    file_name=__name__,
+                    class_name=type(self).__class__,
+                    function_name="get_user",
+                    event="Failed to connect with AuthProvider",
+                    detail=f"Could not get Facebook's access token: {repr(exc)}",
+                    msg="Could not get Facebook's access token",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            )
+
+        # Use Facebook Access Token to retrive user info
+        userinfo_endpoint = settings.FACEBOOK_USERINFO_ENDPOINT
+
+        try:
+            async with httpx.AsyncClient() as client:
+                userinfo_params = {
+                    "fields": "name,email,birthday",
+                    "access_token": facebook_token.access_token,
+                }
+                response = await client.get(userinfo_endpoint, params=userinfo_params)
+
+                user_info = response.json()
+
+                # convert birthday to iso format
+                user_info["birthday"] = datetime.strptime(
+                    user_info.get("birthday", "01-01-1900"), "%m/%d/%Y"
+                )
+
+                return ExternalUser(
+                    sub=user_info["id"],
+                    email=user_info["email"],
+                    name=user_info["name"],
+                    birthday=user_info["birthday"],
+                )
+
+        except Exception as exc:
+            raise ProviderConnectionError(
+                log=AuthenticationProviderLog(
+                    file_name=__name__,
+                    class_name=type(self).__class__,
+                    function_name="get_user",
+                    event="Failed to connect with AuthProvider",
+                    detail=f"Could not get Facebook's user info: {repr(exc)}",
+                    msg="Could not get Facebook's user info",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            )
+
+    async def get_request_uri(self) -> RequestUriParams:
+
+        authorization_endpoint = settings.FACEBOOK_AUTHORIZATION_ENDPOINT
+
+        state_csrf_token = await create_state_csrf_token(self.cache)
+
+        request_uri = self.auth_client.prepare_request_uri(
+            authorization_endpoint,
+            state=state_csrf_token.code,
+            redirect_uri=settings.FACEBOOK_REDIRECT_URL,
+            scope=["email", "user_birthday"],
+        )
+
+        request_uri_params = RequestUriParams(state=state_csrf_token, uri=request_uri)
+
+        return request_uri_params
+
+    async def _get_discovery_document(self) -> dict:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(settings.FACEBOOK_DISCOVERY_URL)
+                discovery_document = response.json()
+        except Exception as exc:
+            raise ProviderConnectionError(
+                log=AuthenticationProviderLog(
+                    file_name=__name__,
+                    class_name=type(self).__class__,
+                    function_name="_get_discovery_document",
+                    event="Failed to connect with AuthProvider",
+                    detail=f"Could not get Facebook's discovery document: {repr(exc)}",
+                    msg="Could not get Facebook's discovery document",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            )
+
+        return discovery_document
