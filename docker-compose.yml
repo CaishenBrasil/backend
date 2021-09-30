@@ -5,18 +5,16 @@ volumes:
 services:
     traefik:
         image: traefik:v2.5
-        command:
-            - "--log.level=DEBUG"
-            - "--api.insecure=true"
-            - "--providers.docker=true"
-            - "--providers.docker.exposedbydefault=false"
-            - "--entrypoints.http.address=:80"
         restart: always
         ports:
             - "8000:80"
             - "8080:8080"
+            - "443:443"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+            - ./cert/server:/etc/certs:ro
+            - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+            - ./traefik/config.yml:/etc/traefik/config.yml:ro
         labels:
             - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)"
     db:
@@ -78,8 +76,9 @@ services:
             - elasticsearch
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.kibana.entrypoints=http"
+            - "traefik.http.routers.kibana.entrypoints=https"
             - "traefik.http.routers.kibana.rule=Host(`kibana.localhost`)"
+            - "traefik.http.routers.kibana.tls=true"
     web:
         build:
             context: .
@@ -95,10 +94,11 @@ services:
             - logstash_agent
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.fastapi.entrypoints=http"
+            - "traefik.http.routers.fastapi.entrypoints=https"
             - "traefik.http.routers.fastapi.rule=Host(`localhost`) && PathPrefix(`/api/v1`)"
             - "traefik.http.middlewares.api-stripprefix.stripprefix.prefixes=/api/v1"
             - "traefik.http.routers.fastapi.middlewares=api-stripprefix"
+            - "traefik.http.routers.fastapi.tls=true"
         logging:
             driver: gelf
             options:

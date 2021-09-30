@@ -165,4 +165,8 @@ Thumbs.db #thumbnail cache on Windows
 
 *.env
 
+### Cerfiles ###
+
+cert/*
+
 # End of https://www.toptal.com/developers/gitignore/api/python,vscode
