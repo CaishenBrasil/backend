@@ -97,4 +97,4 @@ async def setup_logging() -> None:
         cache_logger_on_first_use=True,
     )
     logging.config.dictConfig(logging_settings.dict())
-    await logger.info("Finished configuring Logger")
+    await logger.debug("Finished configuring Logger")
