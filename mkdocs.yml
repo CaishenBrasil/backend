@@ -3,7 +3,6 @@ site_description: CaishenApp - Get hold of your finances.
 # site_url: aa
 theme:
   name: material
-#   custom_dir: overrides
   palette:
   - scheme: default
     primary: teal
@@ -36,21 +35,11 @@ plugins:
 - search
 - markdownextradata:
     data: data
-nav:
-- CaishenApp: index.md
-- Languages:
-  - en: /
-# - features.md
 markdown_extensions:
 - toc:
     permalink: true
 - markdown.extensions.codehilite:
     guess_lang: false
-# Uncomment these 2 lines during development to more easily add highlights
-# - pymdownx.highlight:
-#     linenums: true
-# - mdx_include:
-#     base_path: docs
 - admonition
 - codehilite
 - extra
@@ -60,6 +49,7 @@ markdown_extensions:
       class: mermaid
       format: !!python/name:pymdownx.superfences.fence_code_format ''
 - pymdownx.tabbed
+- pymdownx.details
 - pymdownx.emoji:
     emoji_index: !!python/name:materialx.emoji.twemoji
     emoji_generator: !!python/name:materialx.emoji.to_svg
@@ -77,3 +67,16 @@ extra:
 # extra_javascript:
 # - js/termynal.js
 # - js/custom.js
+nav:
+- "About this project": index.md
+- "Project Structure":
+    - Overview: project_structure/overview.md
+    - Alembic: project_structure/alembic.md
+    - Core: project_structure/core.md
+    - CRUD: project_structure/crud.md
+    - Dependencies: project_structure/dependencies.md
+    - Models: project_structure/models.md
+    - Schemas: project_structure/schemas.md
+    - Routers: project_structure/routers.md
+    - Utils: project_structure/utils.md
+- Deployment: deployment.md
