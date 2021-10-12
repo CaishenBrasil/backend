@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import asyncio
 
+from api.core.database import SessionLocal
 from api.core.logging.caishen_logger import logger
 from api.core.logging.settings import setup_logging
 from api.crud.user import user
 from api.schemas import UserLocalCreate
 from api.settings import settings
-from api.utils.database import SessionLocal
 
 
 async def create_super_user() -> None:

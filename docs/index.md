@@ -1,181 +1,59 @@
-# Caishen App
+# About this Project
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/CaishenBrasil/caishen-user-api/dev.svg)](https://results.pre-commit.ci/latest/github/CaishenBrasil/caishen-user-api/dev)
 
-:warning: Added ModifiedPostgreSqlDsn on `settings.py` as a hack until pydantic gets updated because drivers are not yet permitted on PostgresDsn schemes. Example: `postgresql+asyncpg`
+This project goal is simple: Learn REST API development by developing one.
 
-:warning: Make sure to setup the `.env` file because this will be necessary to start the application using docker
+This is a personal project that I've came up with to learn a little bit of web development, backend engineering and overall best practices.
 
-:warning: I highly suggest you use linux to deploy this app, if you are on windows make sure you are developing under [WSL2](https://docs.microsoft.com/pt-br/windows/wsl/install-win10)
+While developing, there are several doubts that comes up along the way, this documentation aims to address those once solved doubts, so that others that might have questions similar to those I had may benefit from this project to learn as I have learned while building it.
 
-## Environment Variables
+My goal with this documentation is to write a blog about web development, and relate to code I've written here so anyone can clone the repo, start the server on their own machine and experiment. Think of it as a hands-on lab of a REST API backend application.
 
-Before running the app, make sure to create a `.env` file on project root. All environment variables available are declared on on `settings.py`.
+Contributions to the project are **very welcomed**, as long as you want to also write documentation for the code you're pushing, so everyone can follow along.
 
-As this project uses pydantic BaseSettings, the `.env` file will populate the `Settings` class accordingly.
+Contribute to the code: [Caishen Backend](https://github.com/CaishenBrasil/backend)
 
-Below is a sample of how your `.env` file shall look.
+## Project Dependencies
 
-### Caishen Enviroment Variables
+I'll list each dependency we use in this project, right here in this section. Some dependencies might have an exclusive document used to explain why and how we use it in this project, so stay tuned for updates!
 
-```ini
-DEV = False
-LOG_LEVEL = DEBUG
+### Main Dependencies
 
-GOOGLE_CLIENT_ID = #replace: google-client-id-here
-GOOGLE_CLIENT_SECRET = #replace: google-client-secret-here
-GOOGLE_REDIRECT_URL = http://localhost:8000/api/v1/login/google-login-callback/
-GOOGLE_DISCOVERY_URL = https://accounts.google.com/.well-known/openid-configuration
+[Python](https://www.python.org/) - The BEST programming language ever!
 
-FACEBOOK_CLIENT_ID = #replace: facebook-app-id-here
-FACEBOOK_CLIENT_SECRET = #replace: facebook-app-secret-here
-FACEBOOK_REDIRECT_URL = https://localhost/api/v1/login/facebook-login-callback
-FACEBOOK_DISCOVERY_URL = https://www.facebook.com/.well-known/openid-configuration/
-FACEBOOK_AUTHORIZATION_ENDPOINT = https://facebook.com/dialog/oauth/
-FACEBOOK_TOKEN_ENDPOINT = https://graph.facebook.com/oauth/access_token
-FACEBOOK_USERINFO_ENDPOINT = https://graph.facebook.com/me
+[Poetry](https://python-poetry.org/) - THE python packaging and dependency manager that pip should be :wink:
 
-SUPER_USER_NAME = admin
-SUPER_USER_PASSWORD = admin
-SUPER_USER_EMAIL = admin@example.com
-SUPER_USER_BIRTHDATE = 1970-01-01
+This project wouldn't exist if it weren't for [FastAPI](https://fastapi.tiangolo.com/), a python Web Framework for building APIs. FastAPI is the backbone of the project.
 
-DATABASE_TYPE=postgresql
-POSTGRES_USER = admin
-POSTGRES_PASSWORD = admin
-POSTGRES_DB = app
-POSTGRES_SERVER = db # do not change this -> a change here requires a docker-compose change as well
+As we rely on FastAPI, [Pydantic](https://pydantic-docs.helpmanual.io/) also plays a huge role on the project. By the way, Pydantic might be my favorite python library ever.
 
-REDIS_URI = redis://redis:6379 # do not change this -> a change here requires a docker-compose change as well
-```
+[SQLAlchemy](https://www.sqlalchemy.org/) is also another dependency, the go-to python ORM for talking to SQL databases. We're already using SQLAlchemy 2.0 dialect to make things *future proof*.
 
-### Gunicorn Environment Variables
+There are, of course, other dependencies, but they are not as important as those I've just mentioned, nonetheless, I will explain them below:
 
-To maintain consistency, we've re-written gunicorn config file  in `gunicorn_config.py` and used pydantic BaseSettings class to read environment variables for gunicorn.
-As a result, you can pass those variables by creating a file called `gunicorn.env`, check an example below:
+- [Uvicorn](https://www.uvicorn.org/) is a python ASGI web server that runs FastAPI code.
+- [alembic](https://alembic.sqlalchemy.org/en/latest/) is a database migration tool to use together with SQLAlchemy.
+- [passlib](https://passlib.readthedocs.io/en/stable/) is a password hashing library that we use not only to hash passwords but also to create random words to be used as CSRFTokens.
+- [python-jose](https://python-jose.readthedocs.io/en/latest/) is an implementation of the JavaScript Object Signing and Encryption (JOSE) technologies, we use it to handle JSON Web Tokens.
+- [aioredis](https://aioredis.readthedocs.io/en/latest/) is an async [Redis](https://redis.io/) client that we use to handle our Redis cache which is used to store tokens and as a queue for logs as well.
+- [asyncpg](https://magicstack.github.io/asyncpg/current/) is the PostgreSQL async client we use.
+- [structlog](https://www.structlog.org/en/stable/) is our logging library, we use this to convert our logs to JSON format so we can handle them easier in the ELK stack.
+- [orjson](https://github.com/ijl/orjson) is the JSON (de)serializer library we use together with pydantic and structlog to handle JSON (de)serialization.
+- [httpx](https://www.python-httpx.org/) the async http request library that we use to make http requests towards other services from within our application.
 
-```sh
-WORKERS_PER_CORE = 1.0
-HOST = 0.0.0.0
-PORT = 80
-LOG_LEVEL = INFO
-GRACEFUL_TIMEOUT = 120
-TIMEOUT = 120
-KEEP_ALIVE = 5
-```
+### Development Dependencies
 
-## Handling the Database
+Development dependencies are those used only while developing, on this app, we mainly use code quality and documentation dependencies.
 
-`ALEMBIC` is now being used to handle database migrations, so please make sure to use it instead of manually modifying the database.
+A huge thanks to [pre-commit](https://pre-commit.com/) which makes code quality assurance much easier. With it we can easily handle git hooks, mostly, pre-commit hooks so we can guarantee code quality is maintained across different contributors. If the pre-commit hook fails, code is not even committed. :smile:
 
-After changing some database model, run `alembic revision --autogenerate -m "comment the model change here"` to create a new version file.
-Make sure you commit this file to the repo.
+Another incredible dependency is [black](https://black.readthedocs.io/en/stable/) which can automatically format code for us, so we don't lose time fixing minor formatting issues. Use black and [flake8](https://flake8.pycqa.org/en/latest/) and have formatting issues just disappear from your code!
 
-Alembic migrations are run by the `scripts/prestart.sh` script when initializing the application via docker.
+Last, but not least (at all!) [mypy](http://mypy-lang.org/) the static type checker that makes hard to catch bugs, easy to solve.
 
-In case there is any doubt, go to [ALEMBIC Tutorial](https://alembic.sqlalchemy.org/en/latest/tutorial.html) and check the instructions.
+??? note "A note on type annotations"
+    I though static typing python code was a waste of time, however with editor support and mypy, productivity with static typing is just **incredible** and the kind of bugs that we avoid by just using such a simple tool like that is worth it.
 
-## Using HTTPS Locally
-
-It's always great to have our development environment as close as the production environment for testing purposes.
-
-So, developing with HTTPS locally is encouraged. Traefik makes it very easy to do that, even when using localhost. Here is a step by step on how to create your own certificates.
-This step by step was pretty much copied from [Freecodecamp](https://www.freecodecamp.org/news/how-to-get-https-working-on-your-local-development-environment-in-5-minutes-7af615770eec/).
-
-### Step 1 - Generate a Root SSL Certificate
-
-Generate a RSA-2048 key and save it to a file rootCA.key. This file will be used as the key to generate the Root SSL certificate. You will be prompted for a pass phrase which you’ll need to enter each time you use this particular key to generate a certificate.
-
-`openssl genrsa -des3 -out rootCA.key 2048`
-
-`openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 1024 -out rootCA.pem`
-
-### Step 2 - Add the certificate to trusted certificate on your machine
-
-You might need to search on how to do it on your machine, I'll briefly explain it here for Windows OS.
-
-- Search for `certificates` on Windows and open the Certificates Manager.
-- Open up the folder where it says Trusted Root Certificates, or something similar to it.
-- Open up the certificates folder.
-- Right click on the right window, go to "All Tasks" --> Import.
-- Finally, import the rootCA.pem we've just created. If this is not showing up, just select "Show all files" and select the *.pem file.
-
-### Step 3 - Domain SSL certificate
-
-The root SSL certificate can now be used to issue a certificate specifically for your local development environment located at localhost.
-
-Create a new OpenSSL configuration file server.csr.cnf so you can import these settings when creating a certificate instead of entering them on the command line.
-
-```ini
-[req]
-default_bits = 2048
-prompt = no
-default_md = sha256
-distinguished_name = dn
-
-[dn]
-C=US
-ST=RandomState
-L=RandomCity
-O=RandomOrganization
-OU=RandomOrganizationUnit
-emailAddress=hello@example.com
-CN = localhost
-```
-
-Create a v3.ext file in order to create a X509 v3 certificate. Notice how we’re specifying subjectAltName here.
-
-```ini
-authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.1 = localhost
-```
-
-Create a certificate key for localhost using the configuration settings stored in server.csr.cnf. This key is stored in server.key.
-
-`openssl req -new -sha256 -nodes -out server.csr -newkey rsa:2048 -keyout server.key -config <( cat server.csr.cnf )`
-
-A certificate signing request is issued via the root SSL certificate we created earlier to create a domain certificate for localhost. The output is a certificate file called server.crt.
-
-`openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 500 -sha256 -extfile v3.ext`
-
-### Step 4 - Import them to traefik
-
-Finally, we can use our generated certificate and key (server.key and server.crt) to encrypt our HTTP connection using Traefik.
-
-On the docker-compose file under the Traefik service, there is a list of volumes defined:
-
-```yml
-        volumes:
-            - ...
-            - ./cert/server:/etc/certs:ro
-            - ...
-            - ...
-```
-
-Make sure the certificate `server.crt` and the key `server.key` are referenced to the container on `/etc/certs:ro`.
-
-On the example above both the certificate and the key are stored under `/cert/server` on my local machine. You can store them on this path as well  to make your life easier.
-
-## Using docker-compose
-
-To run this application, all you need to do is run the following command:
-
-```sh
-docker-compose up -d --build
-```
-
-This will start the following services:
-
-- [Traefik](https://doc.traefik.io/traefik/) to serve as a reverse proxy for our application
-- [Redis](https://redis.io/) to serve as a cache service for our application
-- [Postgres](https://www.postgresql.org/) to serve as a database for our application
-- [ELK](https://www.elastic.co/) -> there are two services using logstash, one serves as an agent that receives logs from the docker GELF driver and send them to Redis, the other one acts as a consumer that fetches those logs from Redis and send them to elasticsearch. Finally, we use Kibana to visualize our logs.
-- This very api will also be started by docker under the service name of `web`
-
-Hopefully :pray: , if everything worked as expected, you will be able to access the application on [Caishen User API](https://localhost/api/v1)
+    Please, use typing in your projects!
