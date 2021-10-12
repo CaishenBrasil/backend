@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging.config
 import multiprocessing
-import os
 from ipaddress import IPv4Address
 from typing import Any, Dict, Optional
 
@@ -175,22 +174,6 @@ class GunicornLogger:
     def log(self, lvl: str, msg: Any, *args: Any, **kwargs: Any) -> None:
         self.error_log.log(lvl, msg, *args, **kwargs)
 
-    def access(self, resp: Any, req: Any, environ: dict, request_time: Any) -> None:
-        status = resp.status
-        if isinstance(status, str):
-            status = status.split(None, 1)[0]
-
-        self.access_log.info(
-            "request",
-            method=environ["REQUEST_METHOD"],
-            request_uri=environ["RAW_URI"],
-            status=status,
-            response_length=getattr(resp, "sent", None),
-            request_time_seconds="%d.%06d"
-            % (request_time.seconds, request_time.microseconds),
-            pid="<%s>" % os.getpid(),
-        )
-
     def reopen_files(self) -> None:
         pass  # we don't support files
 
@@ -201,4 +184,4 @@ class GunicornLogger:
         """
         Log Gunicorn Configuration used to start Gunicorn service
         """
-        self.info(gunicorn_conf.json())
+        self.debug("Gunicorn Configuration Parameters", detail=gunicorn_conf.json())
