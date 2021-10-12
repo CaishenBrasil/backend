@@ -1,0 +1,79 @@
+site_name: CaishenApp
+site_description: CaishenApp - Get hold of your finances.
+# site_url: aa
+theme:
+  name: material
+#   custom_dir: overrides
+  palette:
+  - scheme: default
+    primary: teal
+    accent: amber
+    toggle:
+      icon: material/lightbulb-outline
+      name: Switch to light mode
+  - scheme: slate
+    primary: teal
+    accent: amber
+    toggle:
+      icon: material/lightbulb
+      name: Switch to dark mode
+  features:
+  - search.suggest
+  - search.highlight
+  - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+  # logo:
+  # favicon:
+  language: en
+repo_name:  CaishenBrasil/backend
+repo_url: https://github.com/CaishenBrasil/backend
+edit_uri: ''
+# google_analytics:
+# - UA-133183413-1
+# - auto
+plugins:
+- search
+- markdownextradata:
+    data: data
+nav:
+- CaishenApp: index.md
+- Languages:
+  - en: /
+# - features.md
+markdown_extensions:
+- toc:
+    permalink: true
+- markdown.extensions.codehilite:
+    guess_lang: false
+# Uncomment these 2 lines during development to more easily add highlights
+# - pymdownx.highlight:
+#     linenums: true
+# - mdx_include:
+#     base_path: docs
+- admonition
+- codehilite
+- extra
+- pymdownx.superfences:
+    custom_fences:
+    - name: mermaid
+      class: mermaid
+      format: !!python/name:pymdownx.superfences.fence_code_format ''
+- pymdownx.tabbed
+- pymdownx.emoji:
+    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_generator: !!python/name:materialx.emoji.to_svg
+extra:
+  social:
+  - icon: fontawesome/brands/github
+    link: https://github.com/CaishenBrasil/backend
+  - icon: fontawesome/brands/twitter
+    link: https://twitter.com/castromonteiro
+  - icon: fontawesome/brands/linkedin
+    link: https://www.linkedin.com/in/leonardo-de-castro-monteiro
+# extra_css:
+# - css/termynal.css
+# - css/custom.css
+# extra_javascript:
+# - js/termynal.js
+# - js/custom.js

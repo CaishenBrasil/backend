@@ -35,6 +35,10 @@ flake8 = "^3.9.2"
 pytest-cov = "^2.11.1"
 sqlalchemy2-stubs = "^0.0.2-alpha.13"
 aiosqlite = "^0.17.0"
+mkdocs = "^1.2.2"
+mkdocs-material = "^7.3.0"
+pymdown-extensions = "^9.0"
+mkdocs-markdownextradata-plugin = "^0.2.4"
 
 [tool.black]
 line-length = 88
