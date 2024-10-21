@@ -259,9 +259,11 @@ async def facebook_login_callback(
             session,
             obj_in=UserCreate(
                 name=external_user.name,
-                birth_date=external_user.birthday
-                if external_user.birthday
-                else datetime.now().date(),
+                birth_date=(
+                    external_user.birthday
+                    if external_user.birthday
+                    else datetime.now().date()
+                ),
                 email=external_user.email,
                 is_admin=False,
                 auth_provider="FACEBOOK",
